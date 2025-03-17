@@ -2,9 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { CpuIcon, HardDrive, LineChart as LineChartIcon, Server, Cpu } from "lucide-react";
+import { CpuIcon, HardDrive, Server, Network } from "lucide-react";
+import { useMetrics } from "@/hooks/useMetrics";
+import { useSystemDetails } from "@/hooks/useSystemDetails";
 
-// Sample data for charts
+// Sample data for charts (we'll keep this for historical charts)
 const performanceData = [
   { name: "00:00", cpu: 45, memory: 60, disk: 30, network: 20 },
   { name: "04:00", cpu: 65, memory: 55, disk: 35, network: 30 },
@@ -26,6 +28,12 @@ const diskData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function SystemMonitor() {
+  const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useMetrics();
+  const { data: systemDetails, isLoading: isLoadingDetails } = useSystemDetails();
+  
+  // Get the first system details object if available
+  const systemInfo = systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
+
   return (
     <div className="space-y-8">
       <div>
@@ -35,6 +43,12 @@ export default function SystemMonitor() {
         </p>
       </div>
 
+      {metricsError && (
+        <div className="p-4 text-red-500 bg-red-50 rounded-md">
+          Error loading metrics: {metricsError instanceof Error ? metricsError.message : 'Unknown error'}
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -42,11 +56,17 @@ export default function SystemMonitor() {
             <CpuIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45%</div>
-            <p className="text-xs text-muted-foreground">
-              Intel Core i7 @ 3.2GHz
-            </p>
-            <Progress value={45} className="h-2 mt-2" />
+            {isLoadingMetrics ? (
+              <div className="h-6 animate-pulse bg-muted rounded"></div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{metrics?.["CPU Usage (%)"].toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {systemInfo ? `${systemInfo.cpu_count} Cores @ ${systemInfo.cpu_freq.toFixed(2)} MHz` : 'CPU'}
+                </p>
+                <Progress value={metrics?.["CPU Usage (%)"]} className="h-2 mt-2" />
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -55,11 +75,17 @@ export default function SystemMonitor() {
             <Server className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7.2 GB</div>
-            <p className="text-xs text-muted-foreground">
-              of 16 GB (45%)
-            </p>
-            <Progress value={45} className="h-2 mt-2" />
+            {isLoadingMetrics ? (
+              <div className="h-6 animate-pulse bg-muted rounded"></div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{metrics?.["RAM Usage (%)"].toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {systemInfo ? `${systemInfo.ram_size.toFixed(1)} GB RAM` : 'Memory'}
+                </p>
+                <Progress value={metrics?.["RAM Usage (%)"]} className="h-2 mt-2" />
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -68,11 +94,17 @@ export default function SystemMonitor() {
             <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">256 GB</div>
-            <p className="text-xs text-muted-foreground">
-              of 1 TB (25.6%)
-            </p>
-            <Progress value={25.6} className="h-2 mt-2" />
+            {isLoadingMetrics ? (
+              <div className="h-6 animate-pulse bg-muted rounded"></div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{metrics?.["Disk Usage (%)"].toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Storage
+                </p>
+                <Progress value={metrics?.["Disk Usage (%)"]} className="h-2 mt-2" />
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -81,11 +113,17 @@ export default function SystemMonitor() {
             <Server className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24 Mbps</div>
-            <p className="text-xs text-muted-foreground">
-              2.4 GB transferred today
-            </p>
-            <Progress value={60} className="h-2 mt-2" />
+            {isLoadingMetrics ? (
+              <div className="h-6 animate-pulse bg-muted rounded"></div>
+            ) : (
+              <>
+                <div className="text-lg font-bold">↑ {metrics?.["KB/s Sent"].toFixed(2)} KB/s</div>
+                <div className="text-lg font-bold">↓ {metrics?.["KB/s Received"].toFixed(2)} KB/s</div>
+                <p className="text-xs text-muted-foreground">
+                  {systemInfo ? `${systemInfo.interface_count} Interfaces` : 'Network interfaces'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

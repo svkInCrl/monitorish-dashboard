@@ -37,7 +37,7 @@ export function Navbar() {
           </div>
         ) : (
           <div className="font-medium md:text-lg">
-            Monitorish Dashboard
+            Threat Erase Dashboard
           </div>
         )}
         <div className="flex items-center gap-4">

@@ -1,7 +1,10 @@
 
+import { useSystemDetails } from "@/hooks/useSystemDetails";
 import { AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Area } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CpuIcon, HardDrive, MonitorIcon, Server, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Sample data for charts
 const performanceData = [
@@ -23,32 +26,37 @@ const processData = [
 ];
 
 export default function Dashboard() {
+  const { data: systemDetails, isLoading, error } = useSystemDetails();
+  
+  // Use only the first object from the array if available
+  const systemInfo = systemDetails?.[0];
+
   const stats = [
     {
-      title: "CPU Usage",
-      value: "45%",
-      change: "+5%",
+      title: "CPU Cores",
+      value: systemInfo ? `${systemInfo.cpu_count}` : "—",
+      change: systemInfo ? `${systemInfo.cpu_freq.toFixed(2)} MHz` : "",
       icon: CpuIcon,
       color: "text-blue-500",
     },
     {
-      title: "Memory Usage",
-      value: "60%",
-      change: "-2%",
+      title: "Memory",
+      value: systemInfo ? `${systemInfo.ram_size.toFixed(2)} GB` : "—",
+      change: systemInfo ? `${systemInfo.virtual_mem_size} GB Virtual` : "",
       icon: Server,
       color: "text-purple-500",
     },
     {
-      title: "Storage",
-      value: "250GB",
-      change: "30% Free",
+      title: "OS",
+      value: systemInfo ? systemInfo.os_type : "—",
+      change: systemInfo ? systemInfo.system_arch : "",
       icon: HardDrive,
       color: "text-amber-500",
     },
     {
-      title: "Active Users",
-      value: "12",
-      change: "+3",
+      title: "Host",
+      value: systemInfo ? systemInfo.host_name.split("-")[0] : "—",
+      change: systemInfo ? `${systemInfo.interface_count} Interfaces` : "",
       icon: Users,
       color: "text-green-500",
     },
@@ -76,10 +84,16 @@ export default function Dashboard() {
                     {stat.title}
                   </p>
                   <div className="flex items-baseline">
-                    <h3 className="text-2xl font-bold">{stat.value}</h3>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {stat.change}
-                    </span>
+                    {isLoading ? (
+                      <Skeleton className="h-6 w-20" />
+                    ) : (
+                      <>
+                        <h3 className="text-2xl font-bold">{stat.value}</h3>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {stat.change}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className={`rounded-full p-2 ${stat.color} bg-primary/10`}>
@@ -90,6 +104,64 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* System Details Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>System Information</CardTitle>
+          <CardDescription>Detailed information about your system</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-4 text-red-500">
+              Failed to load system information
+            </div>
+          ) : systemInfo ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Property</TableHead>
+                  <TableHead>Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">OS</TableCell>
+                  <TableCell>{systemInfo.os_type}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">OS Release</TableCell>
+                  <TableCell>{systemInfo.os_release}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">CPU Frequency</TableCell>
+                  <TableCell>{systemInfo.cpu_freq.toFixed(2)} MHz</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Architecture</TableCell>
+                  <TableCell>{systemInfo.system_arch}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Kernel Version</TableCell>
+                  <TableCell>{systemInfo.kernel_version || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Last Boot</TableCell>
+                  <TableCell>{systemInfo.boot_time ? new Date(systemInfo.boot_time).toLocaleString() : "N/A"}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-4">No system information available</div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-1">

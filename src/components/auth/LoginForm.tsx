@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,12 +20,12 @@ export function LoginForm() {
     // Simulate authentication delay
     setTimeout(() => {
       setIsLoading(false);
-      // Demo credentials check (in a real app, this would be a proper auth system)
-      if (email === "demo@example.com" && password === "password") {
+      // Updated credentials check
+      if (email === "admin@example.com" && password === "admin123") {
         toast.success("Login successful");
         navigate("/dashboard");
       } else {
-        toast.error("Invalid credentials. Try demo@example.com / password");
+        toast.error("Invalid credentials. Try admin@example.com / admin123");
       }
     }, 1000);
   };
@@ -95,7 +94,7 @@ export function LoginForm() {
       </CardContent>
       <CardFooter className="flex flex-col">
         <p className="text-xs text-muted-foreground mt-4">
-          Demo credentials: demo@example.com / password
+          Demo credentials: admin@example.com / admin123
         </p>
       </CardFooter>
     </Card>

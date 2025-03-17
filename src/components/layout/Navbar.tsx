@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+// Map of routes to their descriptions
+const pageDescriptions: Record<string, string> = {
+  "/dashboard": "System Overview Dashboard",
+  "/process": "Process Monitoring & Management",
+  "/system": "System Resource Tracker",
+  "/software": "Installed Software Monitor",
+  "/hardware": "Hardware Performance Analytics",
+  "/user-activity": "User Activity Monitoring",
+  "/": "Monitorish Dashboard" // Default
+};
+
 export function Navbar() {
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the current page description based on path
+  const currentPageDescription = pageDescriptions[location.pathname] || pageDescriptions["/"];
 
   const handleSignOut = () => {
     navigate("/");
@@ -37,7 +52,7 @@ export function Navbar() {
           </div>
         ) : (
           <div className="font-medium md:text-lg">
-            Monitorish Dashboard
+            {currentPageDescription}
           </div>
         )}
         <div className="flex items-center gap-4">

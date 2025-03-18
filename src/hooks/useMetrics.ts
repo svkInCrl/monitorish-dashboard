@@ -20,7 +20,7 @@ const fetchMetrics = async (): Promise<SystemMetrics> => {
 };
 
 export const fetchHistoricalMetrics = async (period: string): Promise<SystemMetrics[]> => {
-  const response = await fetch(`http://127.0.0.1:8000/system-info?period=${period}`);
+  const response = await fetch(`http://127.0.0.1:8000/system-info/?duration=${period}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch historical metrics for period: ${period}`);
   }

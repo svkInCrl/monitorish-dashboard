@@ -14,13 +14,13 @@ import { ErrorMessage } from "@/components/system-monitor/ErrorMessage";
 
 // Placeholder data for when real data is not available
 const performanceData = [
-  { name: "00:00", cpu: 45, memory: 60, disk: 30, network: 20 },
-  { name: "04:00", cpu: 65, memory: 55, disk: 35, network: 30 },
-  { name: "08:00", cpu: 90, memory: 75, disk: 40, network: 60 },
-  { name: "12:00", cpu: 80, memory: 80, disk: 45, network: 50 },
-  { name: "16:00", cpu: 95, memory: 85, disk: 50, network: 70 },
-  { name: "20:00", cpu: 70, memory: 70, disk: 40, network: 40 },
-  { name: "24:00", cpu: 40, memory: 65, disk: 35, network: 25 },
+  { name: "00:00", cpu: 45, ram: 60, disk: 30, network: 20 },
+  { name: "04:00", cpu: 65, ram: 55, disk: 35, network: 30 },
+  { name: "08:00", cpu: 90, ram: 75, disk: 40, network: 60 },
+  { name: "12:00", cpu: 80, ram: 80, disk: 45, network: 50 },
+  { name: "16:00", cpu: 95, ram: 85, disk: 50, network: 70 },
+  { name: "20:00", cpu: 70, ram: 70, disk: 40, network: 40 },
+  { name: "24:00", cpu: 40, ram: 65, disk: 35, network: 25 },
 ];
 
 export default function SystemMonitor() {
@@ -29,8 +29,13 @@ export default function SystemMonitor() {
   const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useMetrics();
   const { data: historicalMetrics, isLoading: isLoadingHistorical, error: historicalError } = useHistoricalMetrics(timePeriod);
   const { data: systemDetails, isLoading: isLoadingDetails } = useSystemDetails();
+
+  // console.log(historicalMetrics);
+  
   
   const systemInfo = systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
+
+
 
   const formatHistoricalData = () => {
     if (!historicalMetrics || historicalMetrics.length === 0) {
@@ -39,10 +44,11 @@ export default function SystemMonitor() {
 
     return historicalMetrics.map(metric => ({
       name: metric.timestamp ? new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-      cpu: metric["CPU Usage (%)"],
-      memory: metric["RAM Usage (%)"],
-      disk: metric["Disk Usage (%)"],
-      network: (metric["KB/s Sent"] + metric["KB/s Received"]) / 2,
+      cpu: metric["cpu_usage"],
+      ram: metric["ram_usage"],
+      gpu: metric["gpu_usage"],
+      disk: metric["disk_usage"],
+      network: (metric["kb_sent"] + metric["kb_received"]) / 2,
     }));
   };
 

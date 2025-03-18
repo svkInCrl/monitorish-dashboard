@@ -8,34 +8,34 @@ export interface SystemMetrics {
   "Disk Usage (%)": number;
   "KB/s Sent": number;
   "KB/s Received": number;
-  timestamp?: string; // Added for historical data
 }
 
+export interface PerformanceDetails {
+  timestamp: string;
+  cpu_usage: number;
+  gpu_usage: number | null;
+  ram_usage: number;
+  disk_usage: number;
+  kb_sent: number;
+  kb_received: number;
+}
+
+
 const fetchMetrics = async (): Promise<SystemMetrics> => {
-  const response = await fetch("http://127.0.0.1:8000/metrics", {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-  },
-});
+  const response = await fetch("http://127.0.0.1:8000/metrics/");
   if (!response.ok) {
     throw new Error("Failed to fetch system metrics");
   }
   return response.json();
 };
 
-export const fetchHistoricalMetrics = async (period: string): Promise<SystemMetrics[]> => {
-  const response = await fetch(`http://127.0.0.1:8000/system-info/?duration=${period}`, {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-  },
-});
+export const fetchHistoricalMetrics = async (period: string): Promise<PerformanceDetails> => {
+  const response = await fetch(`http://127.0.0.1:8000/system-info/?duration=${period}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch historical metrics for period: ${period}`);
   }
+  // console.log(response.json());
+  
   return response.json();
 };
 
@@ -49,7 +49,7 @@ export function useMetrics() {
 
 export function useHistoricalMetrics(period: string) {
   return useQuery({
-    queryKey: ["historicalMetrics", period],
+    queryKey: ["performanceDetails", period],
     queryFn: () => fetchHistoricalMetrics(period),
     enabled: !!period, // Only fetch if period is provided
   });

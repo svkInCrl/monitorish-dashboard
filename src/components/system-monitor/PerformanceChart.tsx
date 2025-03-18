@@ -59,7 +59,7 @@ export function PerformanceChart({
                 />
                 <Line
                   type="monotone"
-                  dataKey="memory"
+                  dataKey="ram"
                   name="Memory"
                   stroke="#8B5CF6"
                   strokeWidth={2}

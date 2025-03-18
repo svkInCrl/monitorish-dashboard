@@ -12,7 +12,13 @@ export interface SystemMetrics {
 }
 
 const fetchMetrics = async (): Promise<SystemMetrics> => {
-  const response = await fetch("http://127.0.0.1:8000/metrics");
+  const response = await fetch("http://127.0.0.1:8000/metrics", {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  },
+});
   if (!response.ok) {
     throw new Error("Failed to fetch system metrics");
   }
@@ -20,7 +26,13 @@ const fetchMetrics = async (): Promise<SystemMetrics> => {
 };
 
 export const fetchHistoricalMetrics = async (period: string): Promise<SystemMetrics[]> => {
-  const response = await fetch(`http://127.0.0.1:8000/system-info/?duration=${period}`);
+  const response = await fetch(`http://127.0.0.1:8000/system-info/?duration=${period}`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  },
+});
   if (!response.ok) {
     throw new Error(`Failed to fetch historical metrics for period: ${period}`);
   }

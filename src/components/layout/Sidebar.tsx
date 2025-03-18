@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -7,6 +6,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   CpuIcon, 
+  File,
   HardDrive, 
   LayoutDashboard, 
   MonitorIcon, 
@@ -52,6 +52,11 @@ const items: SidebarItem[] = [
     name: "User Activity",
     href: "/user-activity",
     icon: Users,
+  },
+  {
+    name: "Critical Files",
+    href: "/critical-files",
+    icon: File,
   },
 ];
 

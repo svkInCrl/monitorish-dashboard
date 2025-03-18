@@ -5,17 +5,18 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContai
 import { CpuIcon, HardDrive, Server, Network } from "lucide-react";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useSystemDetails } from "@/hooks/useSystemDetails";
+import { usePerformanceDetails } from '@/hooks/usePerformanceDetails'
 
 // Sample data for charts (we'll keep this for historical charts)
-const performanceData = [
-  { name: "00:00", cpu: 45, memory: 60, disk: 30, network: 20 },
-  { name: "04:00", cpu: 65, memory: 55, disk: 35, network: 30 },
-  { name: "08:00", cpu: 90, memory: 75, disk: 40, network: 60 },
-  { name: "12:00", cpu: 80, memory: 80, disk: 45, network: 50 },
-  { name: "16:00", cpu: 95, memory: 85, disk: 50, network: 70 },
-  { name: "20:00", cpu: 70, memory: 70, disk: 40, network: 40 },
-  { name: "24:00", cpu: 40, memory: 65, disk: 35, network: 25 },
-];
+// const performanceData = [
+//   { name: "00:00", cpu: 45, memory: 60, disk: 30, network: 20 },
+//   { name: "04:00", cpu: 65, memory: 55, disk: 35, network: 30 },
+//   { name: "08:00", cpu: 90, memory: 75, disk: 40, network: 60 },
+//   { name: "12:00", cpu: 80, memory: 80, disk: 45, network: 50 },
+//   { name: "16:00", cpu: 95, memory: 85, disk: 50, network: 70 },
+//   { name: "20:00", cpu: 70, memory: 70, disk: 40, network: 40 },
+//   { name: "24:00", cpu: 40, memory: 65, disk: 35, network: 25 },
+// ];
 
 const diskData = [
   { name: 'System', value: 120 },
@@ -30,6 +31,10 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 export default function SystemMonitor() {
   const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useMetrics();
   const { data: systemDetails, isLoading: isLoadingDetails } = useSystemDetails();
+  const {data : performanceData, isLoading: isLoadingPerformanceData} = usePerformanceDetails();
+
+  // console.log(performanceData);
+  
   
   // Get the first system details object if available
   const systemInfo = systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
@@ -151,7 +156,7 @@ export default function SystemMonitor() {
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="timestamp" />
                     <YAxis />
                     <Tooltip
                       contentStyle={{ 
@@ -162,14 +167,14 @@ export default function SystemMonitor() {
                     />
                     <Line
                       type="monotone"
-                      dataKey="cpu"
+                      dataKey="cpu_usage"
                       stroke="#3B82F6"
                       strokeWidth={2}
                       activeDot={{ r: 8 }}
                     />
                     <Line
                       type="monotone"
-                      dataKey="memory"
+                      dataKey="ram_usage"
                       stroke="#8B5CF6"
                       strokeWidth={2}
                     />

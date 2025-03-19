@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, CheckCircle, Cpu, HardDrive, Memory, Server, Usb } from "lucide-react";
+import { AlertTriangle, CheckCircle, Cpu, HardDrive, MemoryStick, Server, Usb } from "lucide-react";
 import { useHardwareInfo, useHardwareUpdates } from "@/hooks/useHardwareData";
 import { HardwareStatusTable } from "@/components/hardware-monitor/HardwareStatusTable";
 import { HardwareUpdatesFeed } from "@/components/hardware-monitor/HardwareUpdatesFeed";
@@ -87,7 +86,7 @@ export default function HardwareMonitor() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Memory Status</CardTitle>
-            <Memory className="h-4 w-4 text-muted-foreground" />
+            <MemoryStick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">OK</div>
@@ -239,7 +238,7 @@ export default function HardwareMonitor() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Memory</CardTitle>
-                  <Memory className="h-4 w-4 text-muted-foreground" />
+                  <MemoryStick className="h-4 w-4 text-muted-foreground" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

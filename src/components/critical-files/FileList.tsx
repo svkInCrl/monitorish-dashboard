@@ -7,9 +7,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface CriticalFile {
   id: string;
-  path: string;
+  file_name: string;
+  file_path: string;
+  file_hash: string;
   added_at: string;
   added_by: string;
+  file_type: string;
 }
 
 export function FileList() {
@@ -18,7 +21,7 @@ export function FileList() {
   const { data: files, isLoading } = useQuery({
     queryKey: ["criticalFiles"],
     queryFn: async () => {
-      const response = await fetch("http://127.0.0.1:8000/critical-files/");
+      const response = await fetch("http://127.0.0.1:8000/files/");
       if (!response.ok) {
         throw new Error("Failed to fetch critical files");
       }
@@ -28,7 +31,7 @@ export function FileList() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/critical-files/${id}`, {
+      const response = await fetch(`http://127.0.0.1:8000/files/${id}/`, {
         method: "DELETE",
       });
       
@@ -57,18 +60,22 @@ export function FileList() {
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>File Name</TableHead>
           <TableHead>File Path</TableHead>
           <TableHead>Added By</TableHead>
           <TableHead>Added At</TableHead>
+          <TableHead>File Type</TableHead>
           <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {files?.map((file) => (
           <TableRow key={file.id}>
-            <TableCell>{file.path}</TableCell>
+            <TableCell>{file.file_name}</TableCell>
+            <TableCell>{file.file_path}</TableCell>
             <TableCell>{file.added_by}</TableCell>
             <TableCell>{new Date(file.added_at).toLocaleString()}</TableCell>
+            <TableCell>{file.file_type}</TableCell>
             <TableCell>
               <Button
                 variant="ghost"

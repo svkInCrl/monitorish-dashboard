@@ -19,7 +19,7 @@ interface AddFileFormProps {
 }
 
 interface FormData {
-  path: string;
+  file_path: string;
 }
 
 export function AddFileForm({ onSuccess }: AddFileFormProps) {
@@ -29,14 +29,14 @@ export function AddFileForm({ onSuccess }: AddFileFormProps) {
 
   const form = useForm<FormData>({
     defaultValues: {
-      path: "",
+      file_path: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/critical-files/", {
+      const response = await fetch("http://127.0.0.1:8000/files/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export function AddFileForm({ onSuccess }: AddFileFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="path"
+          name="file_path"
           render={({ field }) => (
             <FormItem>
               <FormLabel>File Path</FormLabel>

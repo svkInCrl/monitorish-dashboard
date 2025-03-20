@@ -55,6 +55,8 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
         <CardDescription>Current hardware devices and their status</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="max-h-[400px] overflow-y-auto">
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -88,6 +90,7 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
             ))}
           </TableBody>
         </Table>
+                      </div>
       </CardContent>
     </Card>
   );

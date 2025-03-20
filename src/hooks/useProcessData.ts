@@ -18,7 +18,7 @@ export interface ProcessCount {
 }
 
 const fetchProcessCount = async (): Promise<ProcessCount> => {
-  const response = await fetch("http://127.0.0.1:8000/process-count");
+  const response = await fetch("http://127.0.0.1:8000/process-count/");
   if (!response.ok) {
     throw new Error("Failed to fetch process count");
   }
@@ -26,7 +26,7 @@ const fetchProcessCount = async (): Promise<ProcessCount> => {
 };
 
 const fetchProcessInfo = async (): Promise<Process[]> => {
-  const response = await fetch("http://127.0.0.1:8000/process-info");
+  const response = await fetch("http://127.0.0.1:8000/process-info/");
   if (!response.ok) {
     throw new Error("Failed to fetch process info");
   }

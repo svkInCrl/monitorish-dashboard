@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { HardwareDevice, HardwareUpdate } from "@/types/hardware";
 
 const fetchHardwareInfo = async (): Promise<HardwareDevice[]> => {
-  const response = await fetch("http://127.0.0.1:8000/hardware-info");
+  const response = await fetch("http://127.0.0.1:8000/hardware-info/");
   if (!response.ok) {
     throw new Error("Failed to fetch hardware information");
   }
@@ -23,7 +23,7 @@ export function useHardwareUpdates() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const eventSource = new EventSource("http://127.0.0.1:8000/sse_stream_hardware");
+    const eventSource = new EventSource("http://127.0.0.1:8000/sse_stream_hardware/");
     
     eventSource.onopen = () => {
       setIsConnected(true);

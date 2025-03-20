@@ -75,7 +75,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="flex items-center space-x-2 transition-opacity duration-200">
             <div className="h-6 w-6 rounded-full bg-primary" />
-            <span className="text-lg font-semibold tracking-tight">Monitorish</span>
+            <span className="text-lg font-semibold tracking-tight">Threat Erase</span>
           </div>
         )}
       </div>

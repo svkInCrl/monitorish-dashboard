@@ -55,9 +55,9 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
         <CardDescription>Current hardware devices and their status</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative max-h-[400px] overflow-hidden border rounded-md">
+      <div className="max-h-[400px] overflow-y-auto relative">
           <Table>
-            <TableHeader className="sticky top-0 bg-background z-10">
+            <TableHeader>
               <TableRow>
                 <TableHead>Status</TableHead>
                 <TableHead>Device Type</TableHead>
@@ -66,7 +66,6 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
                 <TableHead>Last Updated</TableHead>
               </TableRow>
             </TableHeader>
-            <div className="overflow-y-auto max-h-[350px]">
               <TableBody>
                 {devices.map((device) => (
                   <TableRow key={device.hw_id}>
@@ -89,7 +88,6 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
                   </TableRow>
                 ))}
               </TableBody>
-            </div>
           </Table>
         </div>
       </CardContent>

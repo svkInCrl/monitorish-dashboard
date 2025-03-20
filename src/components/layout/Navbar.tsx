@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import belLogo from '@/logo/bel_black_text.png'
 
 // Map of routes to their descriptions
 const pageDescriptions: Record<string, string> = {
@@ -52,7 +53,8 @@ export function Navbar() {
           </div>
         ) : (
           <div className="font-medium md:text-lg">
-            {currentPageDescription}
+            {/* {currentPageDescription} */}
+            <img style={{textAlign: 'center'}} src={belLogo} className="w-60 h-40"></img>
           </div>
         )}
         <div className="flex items-center gap-4">

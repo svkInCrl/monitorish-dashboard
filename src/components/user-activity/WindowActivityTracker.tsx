@@ -16,7 +16,7 @@ export function WindowActivityTracker() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const eventSource = new EventSource("http://127.0.0.1:8000/sse_window_activity");
+    const eventSource = new EventSource("http://127.0.0.1:8000/sse_window_activity/");
     
     eventSource.onopen = () => {
       console.log("Connected to window activity stream");

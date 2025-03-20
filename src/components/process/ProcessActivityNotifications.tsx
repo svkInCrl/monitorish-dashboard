@@ -5,7 +5,7 @@ import { Play, X } from "lucide-react";
 
 export function ProcessActivityNotifications() {
   useEffect(() => {
-    const eventSource = new EventSource("http://127.0.0.1:8000/sse_process_activity");
+    const eventSource = new EventSource("http://127.0.0.1:8000/sse_process_activity/");
     
     eventSource.onopen = () => {
       console.log("Connected to process activity stream");
@@ -20,11 +20,11 @@ export function ProcessActivityNotifications() {
           const isProcessStarted = data.message.includes("started");
           const appName = data.message.split(" ")[0];
           
-          toast({
-            title: isProcessStarted ? `🚀 Process Started` : `🛑 Process Closed`,
-            description: appName ? `${appName}` : "Unknown application",
-            variant: "default",
-          });
+          // toast({
+          //   title: isProcessStarted ? `🚀 Process Started` : `🛑 Process Closed`,
+          //   description: appName ? `${appName}` : "Unknown application",
+          //   variant: "default",
+          // });
         }
       } catch (err) {
         console.error("Error parsing process activity SSE data:", err);

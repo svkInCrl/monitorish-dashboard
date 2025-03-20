@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import threatEraseLogo from "@/logo/Threat_Erase_Logo.png";
+import threatEraseLogo from "@/logo/logo.png";
 
 type SidebarItem = {
   name: string;

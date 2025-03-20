@@ -341,7 +341,7 @@ export default function UserActivityMonitor() {
                           <Badge 
                             variant={
                               activity.action === "opened" ? "outline" : 
-                              activity.action === "modified" ? "warning" : 
+                              activity.action === "modified" ? "secondary" : 
                               "destructive"
                             }
                           >

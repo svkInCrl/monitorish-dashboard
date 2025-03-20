@@ -17,20 +17,19 @@ export function HardwareNotifications() {
         const data = JSON.parse(event.data) as HardwareUpdate;
         
         // Determine icon based on device description
-        let icon;
+        let iconDescription = "";
         if (data.HW_Description?.toLowerCase().includes("usb")) {
-          icon = <Usb className="h-4 w-4" />;
+          iconDescription = "🔌 USB";
         } else if (data.HW_Description?.toLowerCase().includes("wifi") || data.HW_Description?.toLowerCase().includes("network")) {
-          icon = <Wifi className="h-4 w-4" />;
+          iconDescription = "📶 Network";
         } else {
-          icon = <Monitor className="h-4 w-4" />;
+          iconDescription = "🖥️ Device";
         }
         
         toast({
-          title: `Hardware ${data.HW_Status === "Connected" ? "Connected" : "Disconnected"}`,
+          title: `${iconDescription} ${data.HW_Status === "Connected" ? "Connected" : "Disconnected"}`,
           description: `${data.HW_Description || "Unknown device"} (ID: ${data.HW_ID})`,
           variant: data.HW_Status === "Connected" ? "default" : "destructive",
-          icon: icon,
         });
       } catch (err) {
         console.error("Error parsing SSE data:", err);

@@ -1,9 +1,10 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
 
 interface CriticalFile {
   id: string;
@@ -15,11 +16,17 @@ interface CriticalFile {
   file_type: string;
 }
 
-export function FileList() {
+interface FileListProps {
+  refreshTrigger: number;
+  onFileDeleted: () => void;
+}
+
+export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  const { data: files, isLoading } = useQuery({
-    queryKey: ["criticalFiles"],
+  const { data: files, isLoading, refetch } = useQuery({
+    queryKey: ["criticalFiles", refreshTrigger],
     queryFn: async () => {
       const response = await fetch("http://127.0.0.1:8000/files/");
       if (!response.ok) {
@@ -28,6 +35,10 @@ export function FileList() {
       return response.json() as Promise<CriticalFile[]>;
     },
   });
+
+  useEffect(() => {
+    refetch();
+  }, [refreshTrigger, refetch]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -43,6 +54,10 @@ export function FileList() {
         title: "File removed",
         description: "The file has been removed from monitoring.",
       });
+      
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["criticalFiles"] });
+      onFileDeleted();
     } catch (error) {
       toast({
         title: "Error",

@@ -37,7 +37,7 @@ export default function SoftwareMonitor() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Installed Software</CardTitle>
@@ -72,19 +72,6 @@ export default function SoftwareMonitor() {
             <p className="text-xs text-muted-foreground">
               All critical systems up to date
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">License Status</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">20/24</div>
-            <p className="text-xs text-muted-foreground">
-              Licensed applications
-            </p>
-            <Progress value={83.3} className="h-2 mt-2" />
           </CardContent>
         </Card>
       </div>

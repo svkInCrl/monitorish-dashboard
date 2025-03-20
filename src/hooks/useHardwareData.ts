@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { HardwareDevice, HardwareUpdate } from "@/types/hardware";
+import { toast } from "@/hooks/use-toast";
 
 const fetchHardwareInfo = async (): Promise<HardwareDevice[]> => {
   const response = await fetch("http://127.0.0.1:8000/hardware-info/");
@@ -36,6 +38,14 @@ export function useHardwareUpdates() {
         setUpdates((prev) => {
           // Keep the list at a reasonable size by removing older updates
           const newUpdates = [data, ...prev];
+          
+          // Show notification for hardware changes
+          toast({
+            title: `Hardware ${data.HW_Status === "Connected" ? "Connected" : "Disconnected"}`,
+            description: `${data.HW_Description} (ID: ${data.HW_ID})`,
+            variant: data.HW_Status === "Connected" ? "default" : "destructive",
+          });
+          
           return newUpdates.slice(0, 20); // Keep only the 20 most recent updates
         });
       } catch (err) {

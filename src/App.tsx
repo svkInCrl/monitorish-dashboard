@@ -13,6 +13,7 @@ import SoftwareMonitor from "./pages/SoftwareMonitor";
 import HardwareMonitor from "./pages/HardwareMonitor";
 import UserActivityMonitor from "./pages/UserActivityMonitor";
 import CriticalFiles from "./pages/CriticalFiles";
+import LogMonitor from "./pages/LogMonitor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/hardware" element={<HardwareMonitor />} />
             <Route path="/user-activity" element={<UserActivityMonitor />} />
             <Route path="/critical-files" element={<CriticalFiles />} />
+            <Route path="/log-monitor" element={<LogMonitor />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

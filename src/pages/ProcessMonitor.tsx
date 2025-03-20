@@ -126,52 +126,54 @@ export default function ProcessMonitor() {
               </div>
             </div>
           ) : (
-              <div className="max-h-[400px] overflow-y-auto relative">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Process</TableHead>
-                  <TableHead className="text-right">PID</TableHead>
-                  <TableHead>Path</TableHead>
-                  <TableHead className="text-right">PPID</TableHead>
-                  <TableHead className="text-right">Connections</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {processes && processes.map((process) => (
-                  <TableRow key={process.pid}>
-                    <TableCell className="font-medium flex items-center gap-2">
-                      <Terminal className="h-4 w-4 text-muted-foreground" />
-                      {process.process_name}
-                    </TableCell>
-                    <TableCell className="text-right">{process.pid}</TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={process.path}>
-                      {process.path}
-                    </TableCell>
-                    <TableCell className="text-right">{process.ppid}</TableCell>
-                    <TableCell className="text-right">{process.active_connections}</TableCell>
-                    <TableCell className="flex items-center gap-2">
-                      <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                      Running
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => handleEndProcess(process.pid, process.process_name)}
-                        >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">End process</span>
-                      </Button>
-                    </TableCell>
+            <div className="relative max-h-[400px] overflow-hidden border rounded-md">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow>
+                    <TableHead>Process</TableHead>
+                    <TableHead className="text-right">PID</TableHead>
+                    <TableHead>Path</TableHead>
+                    <TableHead className="text-right">PPID</TableHead>
+                    <TableHead className="text-right">Connections</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <div className="overflow-y-auto max-h-[350px]">
+                  <TableBody>
+                    {processes && processes.map((process) => (
+                      <TableRow key={process.pid}>
+                        <TableCell className="font-medium flex items-center gap-2">
+                          <Terminal className="h-4 w-4 text-muted-foreground" />
+                          {process.process_name}
+                        </TableCell>
+                        <TableCell className="text-right">{process.pid}</TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={process.path}>
+                          {process.path}
+                        </TableCell>
+                        <TableCell className="text-right">{process.ppid}</TableCell>
+                        <TableCell className="text-right">{process.active_connections}</TableCell>
+                        <TableCell className="flex items-center gap-2">
+                          <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                          Running
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => handleEndProcess(process.pid, process.process_name)}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">End process</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </div>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

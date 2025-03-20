@@ -55,42 +55,43 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
         <CardDescription>Current hardware devices and their status</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="max-h-[400px] overflow-y-auto">
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Device Type</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>ID</TableHead>
-              <TableHead>Last Updated</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {devices.map((device) => (
-              <TableRow key={device.hw_id}>
-                <TableCell>
-                  <div className="flex items-center">
-                    {device.hw_status === "Connected" ? (
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-red-500 mr-2" />
-                    )}
-                    {device.hw_status}
-                  </div>
-                </TableCell>
-                <TableCell>{device.hw_type}</TableCell>
-                <TableCell>{device.hw_description}</TableCell>
-                <TableCell>{device.hw_id}</TableCell>
-                <TableCell>
-                  {format(new Date(device.timestamp), "MMM d, yyyy HH:mm:ss")}
-                </TableCell>
+        <div className="relative max-h-[400px] overflow-hidden border rounded-md">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
+              <TableRow>
+                <TableHead>Status</TableHead>
+                <TableHead>Device Type</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Last Updated</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <div className="overflow-y-auto max-h-[350px]">
+              <TableBody>
+                {devices.map((device) => (
+                  <TableRow key={device.hw_id}>
+                    <TableCell>
+                      <div className="flex items-center">
+                        {device.hw_status === "Connected" ? (
+                          <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                        ) : (
+                          <Circle className="h-4 w-4 text-red-500 mr-2" />
+                        )}
+                        {device.hw_status}
                       </div>
+                    </TableCell>
+                    <TableCell>{device.hw_type}</TableCell>
+                    <TableCell>{device.hw_description}</TableCell>
+                    <TableCell>{device.hw_id}</TableCell>
+                    <TableCell>
+                      {format(new Date(device.timestamp), "MMM d, yyyy HH:mm:ss")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </div>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

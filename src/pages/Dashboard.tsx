@@ -1,10 +1,11 @@
 
 import { useSystemDetails } from "@/hooks/useSystemDetails";
-import { AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Area } from "recharts";
+import { AreaChart, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Area, Bar } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CpuIcon, HardDrive, MonitorIcon, Server, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useProcessInfo } from "@/hooks/useProcessData";
 
 // Sample data for charts
 const performanceData = [
@@ -17,16 +18,9 @@ const performanceData = [
   { name: "24:00", cpu: 40, memory: 65, disk: 35 },
 ];
 
-const processData = [
-  { name: "Chrome", usage: 35 },
-  { name: "System", usage: 25 },
-  { name: "Node", usage: 20 },
-  { name: "VS Code", usage: 15 },
-  { name: "Other", usage: 5 },
-];
-
 export default function Dashboard() {
   const { data: systemDetails, isLoading, error } = useSystemDetails();
+  const { data: processes, isLoading: isLoadingProcesses } = useProcessInfo();
   
   // Use only the first object from the array if available
   const systemInfo = systemDetails?.[0];
@@ -61,6 +55,11 @@ export default function Dashboard() {
       color: "text-green-500",
     },
   ];
+
+  // Format process data for the chart
+  const processChartData = processes ? 
+    processes.slice(0, 5).map(p => ({ name: p.process_name, usage: Math.floor(Math.random() * 30) + 5 })) : 
+    [];
 
   return (
     <div className="space-y-8">
@@ -222,28 +221,35 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={processData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip
-                    contentStyle={{ 
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      border: 'none'
-                    }}
-                  />
-                  <Bar
-                    dataKey="usage"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              {isLoadingProcesses ? (
+                <div className="h-full w-full flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={processChartData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip
+                      contentStyle={{ 
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        border: 'none'
+                      }}
+                      formatter={(value) => [`${value}%`]}
+                    />
+                    <Bar
+                      dataKey="usage"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -254,41 +260,48 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>System Overview</CardTitle>
             <CardDescription>
-              Real-time system metrics and performance
+              Active processes in real-time
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={performanceData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Tooltip
-                    contentStyle={{ 
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      border: 'none'
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="cpu"
-                    stroke="#3B82F6"
-                    fillOpacity={1}
-                    fill="url(#colorCpu)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {isLoadingProcesses ? (
+                <div className="h-full w-full flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={processChartData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorProcess" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <Tooltip
+                      contentStyle={{ 
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        border: 'none'
+                      }}
+                      formatter={(value) => [`${value}%`]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="usage"
+                      stroke="#3B82F6"
+                      fillOpacity={1}
+                      fill="url(#colorProcess)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

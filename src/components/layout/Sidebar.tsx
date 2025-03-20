@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -9,12 +10,14 @@ import {
   File,
   HardDrive, 
   LayoutDashboard, 
-  MonitorIcon, 
+  MonitorIcon,
+  FileText,
   Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import threatEraseLogo from "@/logo/Threat_Erase_Logo.png";
 
 type SidebarItem = {
   name: string;
@@ -58,6 +61,11 @@ const items: SidebarItem[] = [
     href: "/critical-files",
     icon: File,
   },
+  {
+    name: "Log Monitor",
+    href: "/log-monitor",
+    icon: FileText,
+  },
 ];
 
 export function Sidebar() {
@@ -74,7 +82,7 @@ export function Sidebar() {
       <div className="flex h-14 items-center px-4 py-2">
         {!collapsed && (
           <div className="flex items-center space-x-2 transition-opacity duration-200">
-            <div className="h-6 w-6 rounded-full bg-primary" />
+            <img src={threatEraseLogo} alt="Threat Erase Logo" className="h-6 w-6" />
             <span className="text-lg font-semibold tracking-tight">Threat Erase</span>
           </div>
         )}

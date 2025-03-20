@@ -212,7 +212,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1">
+        {/* <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Active Processes</CardTitle>
             <CardDescription>
@@ -252,13 +252,11 @@ export default function Dashboard() {
               )}
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card> */}
 
-      <div className="grid gap-4 grid-cols-1">
-        <Card>
+<Card>
           <CardHeader>
-            <CardTitle>System Overview</CardTitle>
+            <CardTitle>Active Processes</CardTitle>
             <CardDescription>
               Active processes in real-time
             </CardDescription>
@@ -305,6 +303,11 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+      </div>
+
+      <div className="grid gap-4 grid-cols-1">
+        
       </div>
     </div>
   );

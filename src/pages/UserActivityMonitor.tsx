@@ -1,10 +1,10 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Clock, FileText, MailOpen, MousePointer, User, Users } from "lucide-react";
+import { WindowActivityTracker } from "@/components/user-activity/WindowActivityTracker";
 
 // Sample data
 const activityData = [
@@ -222,6 +222,22 @@ export default function UserActivityMonitor() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <WindowActivityTracker />
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Application Usage</CardTitle>
+            <CardDescription>
+              Most frequently used applications
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground">No data available</p>
           </CardContent>
         </Card>
       </div>

@@ -15,6 +15,8 @@ import UserActivityMonitor from "./pages/UserActivityMonitor";
 import CriticalFiles from "./pages/CriticalFiles";
 import LogMonitor from "./pages/LogMonitor";
 import NotFound from "./pages/NotFound";
+import { HardwareNotifications } from "./components/hardware/HardwareNotifications";
+import { ProcessActivityNotifications } from "./components/process/ProcessActivityNotifications";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <HardwareNotifications />
+        <ProcessActivityNotifications />
         <Routes>
           <Route path="/" element={<Login />} />
           <Route element={<DashboardLayout />}>

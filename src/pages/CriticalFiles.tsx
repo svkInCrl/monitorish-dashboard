@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FileList } from "@/components/critical-files/FileList";
 import { AddFileForm } from "@/components/critical-files/AddFileForm";
+import { FileMonitoringLogs } from "@/components/critical-files/FileMonitoringLogs";
 import { PasswordProtection } from "@/components/critical-files/PasswordProtection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,14 +52,18 @@ export default function CriticalFiles() {
       {!isAuthenticated ? (
         <PasswordProtection onAuthenticated={() => setIsAuthenticated(true)} />
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Monitored Files</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileList refreshTrigger={refreshTrigger} onFileDeleted={handleFileDeleted} />
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Monitored Files</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileList refreshTrigger={refreshTrigger} onFileDeleted={handleFileDeleted} />
+            </CardContent>
+          </Card>
+          
+          <FileMonitoringLogs />
+        </div>
       )}
     </div>
   );

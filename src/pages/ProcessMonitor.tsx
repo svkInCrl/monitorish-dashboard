@@ -1,12 +1,12 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Activity, Circle, RefreshCw, X, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProcessCount, useProcessInfo } from "@/hooks/useProcessData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ProcessMonitor() {
   const { toast } = useToast();
@@ -23,17 +23,6 @@ export default function ProcessMonitor() {
     isLoading: isLoadingProcesses,
     refetch: refetchProcesses 
   } = useProcessInfo();
-
-  // Sample data for the active processes over time
-  const processData = [
-    { time: '00:00', count: 124 },
-    { time: '01:00', count: 135 },
-    { time: '02:00', count: 127 },
-    { time: '03:00', count: 146 },
-    { time: '04:00', count: 138 },
-    { time: '05:00', count: 151 },
-    { time: '06:00', count: processCount?.process_count || 155 },
-  ];
 
   const handleRefresh = async () => {
     setRefreshTrigger(prev => prev + 1);
@@ -124,35 +113,66 @@ export default function ProcessMonitor() {
 
       <Card>
         <CardHeader>
-          <CardTitle>System Process Overview</CardTitle>
-          <CardDescription>Active process count over time</CardDescription>
+          <CardTitle>Active Processes</CardTitle>
+          <CardDescription>
+            Manage and monitor all running processes
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={processData}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                  name="Process Count"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          {isLoadingProcesses ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin">
+                <RefreshCw className="h-8 w-8 text-muted-foreground" />
+              </div>
+            </div>
+          ) : (
+              <div className="max-h-[400px] overflow-y-auto relative">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Process</TableHead>
+                  <TableHead className="text-right">PID</TableHead>
+                  <TableHead>Path</TableHead>
+                  <TableHead className="text-right">PPID</TableHead>
+                  <TableHead className="text-right">Connections</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {processes && processes.map((process) => (
+                  <TableRow key={process.pid}>
+                    <TableCell className="font-medium flex items-center gap-2">
+                      <Terminal className="h-4 w-4 text-muted-foreground" />
+                      {process.process_name}
+                    </TableCell>
+                    <TableCell className="text-right">{process.pid}</TableCell>
+                    <TableCell className="max-w-[200px] truncate" title={process.path}>
+                      {process.path}
+                    </TableCell>
+                    <TableCell className="text-right">{process.ppid}</TableCell>
+                    <TableCell className="text-right">{process.active_connections}</TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                      Running
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => handleEndProcess(process.pid, process.process_name)}
+                        >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">End process</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+                </div>
+          )}
         </CardContent>
       </Card>
     </div>

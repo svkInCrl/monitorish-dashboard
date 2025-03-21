@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Clock } from "lucide-react";
 
-export type TimePeriod = "day" | "week" | "month" | "year";
+export type TimePeriod = "live" | "day" | "week" | "month" | "year";
 
 interface TimePeriodSelectorProps {
   value: TimePeriod;
@@ -33,6 +33,7 @@ export function TimePeriodSelector({
           <SelectValue placeholder="Select time period" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="live">Live (60 seconds)</SelectItem>
           <SelectItem value="day">Last 24 Hours</SelectItem>
           <SelectItem value="week">Last Week</SelectItem>
           <SelectItem value="month">Last Month</SelectItem>

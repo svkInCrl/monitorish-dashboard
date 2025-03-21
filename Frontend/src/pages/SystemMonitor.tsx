@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMetrics, useHistoricalMetrics } from "@/hooks/useMetrics";
@@ -29,13 +29,8 @@ export default function SystemMonitor() {
   const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useMetrics();
   const { data: historicalMetrics, isLoading: isLoadingHistorical, error: historicalError } = useHistoricalMetrics(timePeriod);
   const { data: systemDetails, isLoading: isLoadingDetails } = useSystemDetails();
-
-  // console.log(historicalMetrics);
-  
   
   const systemInfo = systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
-
-
 
   const formatHistoricalData = () => {
     if (!historicalMetrics || historicalMetrics.length === 0) {

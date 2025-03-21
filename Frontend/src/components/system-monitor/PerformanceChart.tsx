@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { SystemMetrics } from "@/hooks/useMetrics";
 import { TimePeriod } from "@/components/TimePeriodSelector";
 
@@ -16,14 +16,23 @@ export function PerformanceChart({
   isLoading,
   timePeriod,
 }: PerformanceChartProps) {
+  const getPeriodDescription = () => {
+    switch(timePeriod) {
+      case "live": return "the last 60 seconds (live)";
+      case "day": return "the last 24 hours";
+      case "week": return "the last week";
+      case "month": return "the last month";
+      case "year": return "the last year";
+      default: return "selected period";
+    }
+  };
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle>System Performance</CardTitle>
         <CardDescription>
-          CPU and memory usage over {timePeriod === "day" ? "the last 24 hours" : 
-                                    timePeriod === "week" ? "the last week" : 
-                                    timePeriod === "month" ? "the last month" : "the last year"}
+          CPU and memory usage over {getPeriodDescription()}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -37,7 +46,6 @@ export function PerformanceChart({
               <LineChart
                 data={data}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -50,10 +58,11 @@ export function PerformanceChart({
                   }}
                   formatter={(value) => [`${value}%`]}
                 />
+                <Legend />
                 <Line
                   type="monotone"
                   dataKey="cpu"
-                  name="CPU"
+                  name="CPU Usage"
                   stroke="#3B82F6"
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
@@ -61,7 +70,7 @@ export function PerformanceChart({
                 <Line
                   type="monotone"
                   dataKey="ram"
-                  name="Memory"
+                  name="Memory Usage"
                   stroke="#8B5CF6"
                   strokeWidth={2}
                 />

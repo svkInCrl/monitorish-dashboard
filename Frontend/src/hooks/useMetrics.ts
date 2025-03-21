@@ -34,7 +34,6 @@ export const fetchHistoricalMetrics = async (period: string): Promise<Performanc
   if (!response.ok) {
     throw new Error(`Failed to fetch historical metrics for period: ${period}`);
   }
-  // console.log(response.json());
   
   return response.json();
 };
@@ -43,7 +42,7 @@ export function useMetrics() {
   return useQuery({
     queryKey: ["systemMetrics"],
     queryFn: fetchMetrics,
-    refetchInterval: 1000, // Poll every 5 seconds for real-time data
+    refetchInterval: 1000, // Poll every second for real-time data
   });
 }
 
@@ -52,5 +51,6 @@ export function useHistoricalMetrics(period: string) {
     queryKey: ["performanceDetails", period],
     queryFn: () => fetchHistoricalMetrics(period),
     enabled: !!period, // Only fetch if period is provided
+    refetchInterval: period === "live" ? 1000 : false, // Refresh every second if in live mode
   });
 }

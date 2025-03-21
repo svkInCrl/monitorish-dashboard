@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TimePeriod } from "@/components/TimePeriodSelector";
 
 interface NetworkActivityChartProps {
@@ -20,9 +20,12 @@ export function NetworkActivityChart({
       <CardHeader>
         <CardTitle>Network Activity</CardTitle>
         <CardDescription>
-          Network throughput over {timePeriod === "day" ? "the last 24 hours" : 
-                                timePeriod === "week" ? "the last week" : 
-                                timePeriod === "month" ? "the last month" : "the last year"}
+          {timePeriod === "live" ? "Real-time" : 
+          
+          `Network throughput over ${timePeriod === "day" ? "the last 24 hours" : 
+            timePeriod === "week" ? "the last week" : 
+            timePeriod === "month" ? "the last month" : "the last year"}`
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,14 +51,25 @@ export function NetworkActivityChart({
                   }}
                   formatter={(value) => [`${value}KB/s`]}
                 />
+                <Legend />
                 <Line
                   type="monotone"
-                  dataKey="network"
-                  name="Network"
+                  dataKey="upload"
+                  name="Upload"
                   stroke="#10B981"
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
+                  dot={false}
                 />
+                <Line
+                  type="monotone"
+                  dataKey="download"
+                  name="Donwload"
+                  stroke="#3B82F6"
+                  strokeWidth={2}
+                  activeDot={{ r: 8 }}
+                  dot={false}
+                  />
               </LineChart>
             </ResponsiveContainer>
           )}

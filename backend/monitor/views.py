@@ -10,7 +10,7 @@ import os
 import datetime
 import json
 import time
-from django.utils.timezone import now, timedelta
+from django.utils.timezone import now, timedelta, make_aware, is_aware
 from django.http import JsonResponse, StreamingHttpResponse
 from datetime import datetime
 import threading
@@ -102,19 +102,33 @@ def get_metrics(request):
 
 def get_system_monitor_data(request):
     duration_map = {
+        "live": timedelta(minutes=1),
         "day": timedelta(days=1),
         "week": timedelta(weeks=1),
         "month": timedelta(weeks=4),
         "year": timedelta(weeks=52),
     }
 
-    duration = request.GET.get("duration", "all")  # Default to 1 min
+    duration = request.GET.get("duration", "live")  # Default to 1 min
     time_threshold = now() - duration_map.get(duration, timedelta(minutes=1))
+
+    # print(SystemMonitor.objects.first().timestamp)  # Check one entry
+    # print(time_threshold)
+
+    # print(now())
+
+    if not is_aware(time_threshold):
+        time_threshold = make_aware(time_threshold)
 
     # Query filtered data
     data = SystemMonitor.objects.filter(timestamp__gte=time_threshold).values(
         "timestamp", "cpu_usage", "gpu_usage", "ram_usage", "disk_usage", "kb_sent", "kb_received"
     )
+    
+    # datetime.datetime(2025, 3, 21, 13, 40, 11, tzinfo=datetime.timezone.utc)
+
+
+    # print(data)
     
     datalist = list(data)
     # for entry in datalist:

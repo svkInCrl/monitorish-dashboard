@@ -66,6 +66,7 @@ export function PerformanceChart({
                   stroke="#3B82F6"
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
+                  dot={false}
                 />
                 <Line
                   type="monotone"
@@ -73,6 +74,7 @@ export function PerformanceChart({
                   name="Memory Usage"
                   stroke="#8B5CF6"
                   strokeWidth={2}
+                  dot={false}
                 />
               </LineChart>
             </ResponsiveContainer>

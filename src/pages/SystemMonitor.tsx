@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +11,11 @@ import { DiskPerformanceChart } from "@/components/system-monitor/DiskPerformanc
 import { NetworkActivityChart } from "@/components/system-monitor/NetworkActivityChart";
 import { ErrorMessage } from "@/components/system-monitor/ErrorMessage";
 
+// Import dayjs and utc plugin
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
 // Placeholder data for when real data is not available
 const performanceData = [
   { name: "00:00", cpu: 45, ram: 60, disk: 30, network: 20 },
@@ -24,26 +28,43 @@ const performanceData = [
 ];
 
 export default function SystemMonitor() {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
-  
-  const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useMetrics();
-  const { data: historicalMetrics, isLoading: isLoadingHistorical, error: historicalError } = useHistoricalMetrics(timePeriod);
-  const { data: systemDetails, isLoading: isLoadingDetails } = useSystemDetails();
-  
-  const systemInfo = systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("live");
 
+  const {
+    data: metrics,
+    isLoading: isLoadingMetrics,
+    error: metricsError,
+  } = useMetrics();
+
+  const {
+    data: historicalMetrics,
+    isLoading: isLoadingHistorical,
+    error: historicalError,
+  } = useHistoricalMetrics(timePeriod);
+
+  const { data: systemDetails, isLoading: isLoadingDetails } =
+    useSystemDetails();
+
+  const systemInfo =
+    systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
+
+  // Format data with exact DB timestamps or convert to local time
   const formatHistoricalData = () => {
     if (!historicalMetrics || historicalMetrics.length === 0) {
       return performanceData;
     }
 
-    return historicalMetrics.map(metric => ({
-      name: metric.timestamp ? new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+    return historicalMetrics.map((metric) => ({
+      // ✅ Correct conversion from UTC to local time
+      name: metric.timestamp
+        ? dayjs.utc(metric.timestamp).format("HH:mm:ss")
+        : "",
       cpu: metric["cpu_usage"],
       ram: metric["ram_usage"],
       gpu: metric["gpu_usage"],
       disk: metric["disk_usage"],
-      network: (metric["kb_sent"] + metric["kb_received"]) / 2,
+      upload: metric["kb_sent"],
+      download: metric["kb_received"],
     }));
   };
 
@@ -51,6 +72,7 @@ export default function SystemMonitor() {
 
   return (
     <div className="space-y-8">
+      {/* Header with title and time period selector */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">System Monitor</h2>
@@ -58,33 +80,44 @@ export default function SystemMonitor() {
             Monitor system resources and performance
           </p>
         </div>
-        <TimePeriodSelector 
-          value={timePeriod} 
-          onChange={setTimePeriod} 
+        <TimePeriodSelector
+          value={timePeriod}
+          onChange={setTimePeriod}
           className="mr-2"
         />
       </div>
 
+      {/* Error Messages */}
       {metricsError && (
-        <ErrorMessage 
-          message={metricsError instanceof Error ? metricsError.message : 'Unknown error'} 
+        <ErrorMessage
+          message={
+            metricsError instanceof Error
+              ? metricsError.message
+              : "Unknown error"
+          }
           variant="error"
         />
       )}
 
       {historicalError && (
-        <ErrorMessage 
-          message={historicalError instanceof Error ? historicalError.message : 'Unknown error'} 
+        <ErrorMessage
+          message={
+            historicalError instanceof Error
+              ? historicalError.message
+              : "Unknown error"
+          }
           variant="warning"
         />
       )}
 
-      <MetricsDashboard 
-        metrics={metrics} 
-        systemDetails={systemInfo} 
-        isLoading={isLoadingMetrics} 
+      {/* Metrics Dashboard */}
+      <MetricsDashboard
+        metrics={metrics}
+        systemDetails={systemInfo}
+        isLoading={isLoadingMetrics}
       />
 
+      {/* Tabs for charts and other system information */}
       <Tabs defaultValue="performance" className="space-y-4">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:w-[400px]">
           <TabsTrigger value="performance">Performance</TabsTrigger>
@@ -92,34 +125,33 @@ export default function SystemMonitor() {
           <TabsTrigger value="network">Network</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
-        
+
+        {/* Performance Tab */}
         <TabsContent value="performance" className="space-y-4">
-          <PerformanceChart 
-            data={chartData} 
-            isLoading={isLoadingHistorical} 
-            timePeriod={timePeriod} 
+          <PerformanceChart
+            data={chartData}
+            isLoading={isLoadingHistorical}
+            timePeriod={timePeriod}
           />
         </TabsContent>
-        
+
+        {/* Storage Tab */}
         <TabsContent value="storage" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <DiskStorageChart />
-            <DiskPerformanceChart 
-              data={chartData} 
-              isLoading={isLoadingHistorical} 
-              timePeriod={timePeriod} 
-            />
+            <h1>Coming soon...</h1>
           </div>
         </TabsContent>
-        
+
+        {/* Network Tab */}
         <TabsContent value="network" className="space-y-4">
-          <NetworkActivityChart 
-            data={chartData} 
-            isLoading={isLoadingHistorical} 
-            timePeriod={timePeriod} 
+          <NetworkActivityChart
+            data={chartData}
+            isLoading={isLoadingHistorical}
+            timePeriod={timePeriod}
           />
         </TabsContent>
-        
+
+        {/* Processes Tab */}
         <TabsContent value="processes" className="space-y-4">
           <Card>
             <CardHeader>

@@ -5,9 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Clock, FileText, MailOpen, MousePointer, User, Users } from "lucide-react";
 import { WindowActivityTracker } from "@/components/user-activity/WindowActivityTracker";
-import { useFileActivityData, FileActivityLog } from "@/components/critical-files/FileMonitoringLogs";
-import { useMemo } from "react";
-import { format, subHours } from "date-fns";
 
 // Sample data
 const activityData = [
@@ -80,64 +77,9 @@ const activityTypeData = [
   { name: 'Web Browsing', value: 15 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#FF5733'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function UserActivityMonitor() {
-  const fileActivities = useFileActivityData();
-
-  // Process file activity data for the timeline
-  const fileActivityTimeline = useMemo(() => {
-    // Create hourly buckets for the last 8 hours
-    const now = new Date();
-    const hours = Array.from({ length: 8 }, (_, i) => {
-      const hour = subHours(now, i);
-      return {
-        time: format(hour, "HH:00"),
-        fileOpened: 0,
-        fileModified: 0,
-        fileDeleted: 0,
-        hour: format(hour, "HH"),
-      };
-    }).reverse();
-
-    // Count activities by hour
-    fileActivities.forEach(activity => {
-      const activityHour = format(new Date(activity.timestamp), "HH");
-      const hourBucket = hours.find(h => h.hour === activityHour);
-      
-      if (hourBucket) {
-        if (activity.action === "opened") hourBucket.fileOpened += 1;
-        if (activity.action === "modified") hourBucket.fileModified += 1;
-        if (activity.action === "deleted") hourBucket.fileDeleted += 1;
-      }
-    });
-
-    return hours;
-  }, [fileActivities]);
-
-  // Process file activity data by type
-  const fileActivityByType = useMemo(() => {
-    const counts = {
-      opened: fileActivities.filter(a => a.action === "opened").length,
-      modified: fileActivities.filter(a => a.action === "modified").length,
-      deleted: fileActivities.filter(a => a.action === "deleted").length,
-    };
-
-    return [
-      { name: 'File Opened', value: counts.opened || 1 },
-      { name: 'File Modified', value: counts.modified || 1 },
-      { name: 'File Deleted', value: counts.deleted || 0 },
-    ];
-  }, [fileActivities]);
-
-  // Combine file activity with other activity types
-  const combinedActivityTypes = useMemo(() => {
-    return [
-      ...activityTypeData,
-      { name: 'File Operations', value: fileActivities.length || 2 },
-    ];
-  }, [fileActivities]);
-
   return (
     <div className="space-y-8">
       <div>
@@ -203,14 +145,14 @@ export default function UserActivityMonitor() {
           <CardHeader>
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>
-              User sessions, events, and file activity over time
+              User sessions and events over time
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={[...activityData, ...fileActivityTimeline]}
+                  data={activityData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -239,36 +181,11 @@ export default function UserActivityMonitor() {
                     stroke="#8B5CF6"
                     strokeWidth={2}
                   />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="fileOpened"
-                    stroke="#00C49F"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="fileModified"
-                    stroke="#FFBB28"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="fileDeleted"
-                    stroke="#FF5733"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
-        
         <Card>
           <CardHeader>
             <CardTitle>Activity by Type</CardTitle>
@@ -281,7 +198,7 @@ export default function UserActivityMonitor() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={combinedActivityTypes}
+                    data={activityTypeData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -291,7 +208,7 @@ export default function UserActivityMonitor() {
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
-                    {combinedActivityTypes.map((entry, index) => (
+                    {activityTypeData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -314,50 +231,13 @@ export default function UserActivityMonitor() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Critical File Activity</CardTitle>
+            <CardTitle>Application Usage</CardTitle>
             <CardDescription>
-              Recent activity on monitored files
+              Most frequently used applications
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px] overflow-y-auto">
-              {fileActivities.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">No file activity recorded yet</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader className="sticky top-0 bg-background">
-                    <TableRow>
-                      <TableHead>Action</TableHead>
-                      <TableHead>File</TableHead>
-                      <TableHead>Time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fileActivities.map((activity) => (
-                      <TableRow key={activity.id}>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              activity.action === "opened" ? "outline" : 
-                              activity.action === "modified" ? "secondary" : 
-                              "destructive"
-                            }
-                          >
-                            {activity.action}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">{activity.file_name}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {format(new Date(activity.timestamp), "HH:mm:ss")}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
+          <CardContent className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground">No data available</p>
           </CardContent>
         </Card>
       </div>

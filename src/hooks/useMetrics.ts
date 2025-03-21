@@ -43,7 +43,7 @@ export function useMetrics() {
   return useQuery({
     queryKey: ["systemMetrics"],
     queryFn: fetchMetrics,
-    refetchInterval: 5000, // Poll every 5 seconds for real-time data
+    refetchInterval: 1000, // Poll every 5 seconds for real-time data
   });
 }
 

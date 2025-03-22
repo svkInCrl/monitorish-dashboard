@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import belLogo from '@/logo/bel_black_text.png'
+import threatEraseLogo from "@/logo/logo.png";
 
 // Map of routes to their descriptions
 const pageDescriptions: Record<string, string> = {
@@ -76,8 +77,8 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://i.pravatar.cc/200" alt="User avatar" />
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={threatEraseLogo} alt="User avatar" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <User className="h-4 w-4" />
                   </AvatarFallback>

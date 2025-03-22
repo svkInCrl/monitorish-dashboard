@@ -79,14 +79,30 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64"
       )}
     >
+
       <div className="flex h-14 items-center px-4 py-2">
+        <img
+          src={threatEraseLogo}
+          alt="Threat Erase Logo"
+          className={cn(
+            "transition-all duration-300",
+            collapsed ? "h-8 w-8" : "h-12 w-12" // Smaller logo when collapsed
+          )}
+        />
         {!collapsed && (
-          <div className="flex items-center space-x-2 transition-opacity duration-200">
-            <img src={threatEraseLogo} alt="Threat Erase Logo" className="h-6 w-6" />
-            <span className="text-lg font-semibold tracking-tight">Threat Erase</span>
-          </div>
+          <span className="text-xl font-semibold tracking-tight transition-opacity duration-200">
+            Threat Erase
+          </span>
         )}
       </div>
+      {/* <div className="flex h-14 items-center px-4 py-2">
+        {!collapsed && (
+          <div className="flex items-center space-x-2 transition-opacity duration-200">
+            <img src={threatEraseLogo} alt="Threat Erase Logo" className="h-12 w-12" />
+            <span className="text-xl font-semibold tracking-tight">Threat Erase</span>
+          </div>
+        )}
+      </div> */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <nav className="flex flex-col gap-1 px-2 py-2">

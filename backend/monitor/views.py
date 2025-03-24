@@ -439,10 +439,11 @@ def critical_files(request):
         return Response(serializer.errors, status=400)
     
 @api_view(['DELETE'])
-def delete_file(request, file_id):
+def delete_file(request, hash):
     """Delete a critical file by ID."""
+    print(hash)
     try:
-        file = CriticalFile.objects.get(id=file_id)
+        file = CriticalFile.objects.get(file_hash=hash)
         file.delete()
         return Response({"message": "File deleted successfully"}, status=200)
     except CriticalFile.DoesNotExist:

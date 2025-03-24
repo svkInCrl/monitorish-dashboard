@@ -7,13 +7,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 
 interface CriticalFile {
-  id: string;
+  id: string; // Django BigAutoField corresponds to number, not string
   file_name: string;
   file_path: string;
   file_hash: string;
-  added_at: string;
-  added_by: string;
   file_type: string;
+  added_by: string;
+  added_at: string | null; // added_at is nullable in the model
 }
 
 interface FileListProps {
@@ -32,6 +32,7 @@ export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
       if (!response.ok) {
         throw new Error("Failed to fetch critical files");
       }
+      // console.log(response.json());
       return response.json() as Promise<CriticalFile[]>;
     },
   });
@@ -40,11 +41,13 @@ export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
     refetch();
   }, [refreshTrigger, refetch]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (hash: string) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/files/${id}/`, {
+      const response = await fetch(`http://127.0.0.1:8000/files/${hash}/`, {
         method: "DELETE",
       });
+
+      console.log(`trying to dlt`);
       
       if (!response.ok) {
         throw new Error("Failed to delete file");
@@ -61,7 +64,7 @@ export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to remove file from monitoring.",
+        description: `Failed to remove file from monitoring.  Error: ${error}`,
         variant: "destructive",
       });
     }
@@ -70,6 +73,35 @@ export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const fileType = (type: string) => {
+    switch (type) {
+      case "exe":
+        return "Executable";
+      case "dll":
+        return "Dynamic Link Library";
+      case "sys":
+        return "System File";
+      case "py":
+        return "Python Script";
+      case "sh":
+        return "Shell Script";
+      case "log":
+        return "Log File";
+      case "deb":
+        return "Debian Package";
+      case "rpm":
+        return "Red Hat Package";
+      case "zip":
+        return "Zip Archive";
+      case "tar":
+        return "Tar Archive"; 
+      case "json":
+        return "JSON File";
+      default:  
+        return "Unknown";
+    }
+  };
 
   return (
     <Table>
@@ -87,15 +119,15 @@ export function FileList({ refreshTrigger, onFileDeleted }: FileListProps) {
         {files?.map((file) => (
           <TableRow key={file.id}>
             <TableCell>{file.file_name}</TableCell>
-            <TableCell>{file.file_path}</TableCell>
+            <TableCell className="font-mono text-xs">{file.file_path}</TableCell>
             <TableCell>{file.added_by}</TableCell>
             <TableCell>{new Date(file.added_at).toLocaleString()}</TableCell>
-            <TableCell>{file.file_type}</TableCell>
+            <TableCell>{fileType(file.file_type)}</TableCell>
             <TableCell>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleDelete(file.id)}
+                onClick={() => handleDelete(file.file_hash)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

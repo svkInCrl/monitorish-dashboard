@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import SystemMonitor, SystemDetails, UserActivity, ProcessInfo, ProcessResources, SoftwareMonitor, InstalledSoftware, InitialHardwareConfig, HardwareChangeTracking, CriticalFile
 import hashlib
+import getpass
+import datetime
 
 class ProcessInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -56,15 +58,16 @@ class SystemDetailsSerializer(serializers.ModelSerializer):
 class CriticalFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CriticalFile
-        fields = ['id', 'file_path', 'file_name', 'file_hash', 'file_type']
-        read_only_fields = ['id', 'file_name', 'file_hash', 'file_type']
+        fields = ['file_path', 'file_name', 'file_hash', 'file_type', 'added_by', 'added_at']
+        read_only_fields = ['file_name', 'file_hash', 'file_type', 'added_by', 'added_at']
     
     def create(self, validated_data):
         """Calculate hash before saving the file."""
         file_path = validated_data.get('file_path')
         validated_data['file_name'] = file_path.split('/')[-1]
         validated_data['file_type'] = file_path.split('.')[-1]
-
+        validated_data['added_by'] = getpass.getuser()
+        validated_data['added_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
         # Calculate SHA-256 file hash
         validated_data['file_hash'] = self.calculate_file_hash(file_path)
         

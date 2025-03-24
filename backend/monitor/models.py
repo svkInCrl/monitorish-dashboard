@@ -199,11 +199,12 @@ class LoginEvents(models.Model):
 
 
 class CriticalFile(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    file_path = models.TextField(primary_key=True)  # Set file_path as primary key
     file_name = models.CharField(max_length=255)
-    file_path = models.TextField()
     file_hash = models.CharField(max_length=64)
     file_type = models.CharField(max_length=50)
+    added_by = models.CharField(max_length=100)
+    added_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False

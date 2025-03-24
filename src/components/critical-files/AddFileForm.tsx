@@ -57,7 +57,7 @@ export function AddFileForm({ onSuccess }: AddFileFormProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add file to monitoring.",
+        description: `${error.message}`,
         variant: "destructive",
       });
     } finally {

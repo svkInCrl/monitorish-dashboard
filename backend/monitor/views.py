@@ -69,36 +69,50 @@ class SystemDetailsListView(ListAPIView):
     queryset = SystemDetails.objects.all()
     serializer_class = SystemDetailsSerializer
     
+# def get_metrics(request):
+#     """Fetch real-time system metrics."""
+    
+#     interval = 1
+    
+#     net_io_start = psutil.net_io_counters()
+#     bytes_sent_start = net_io_start.bytes_sent
+#     bytes_recv_start = net_io_start.bytes_recv
+    
+#     time.sleep(interval)
+    
+#     net_io_end = psutil.net_io_counters()
+#     bytes_sent_end = net_io_end.bytes_sent
+#     bytes_recv_end = net_io_end.bytes_recv
+    
+#     bytes_sent_diff = bytes_sent_end - bytes_sent_start
+#     bytes_recv_diff = bytes_recv_end - bytes_recv_start
+    
+#     kb_sent_per_sec = round(bytes_sent_diff / 1024 / interval, 2)
+#     kb_recv_per_sec = round(bytes_recv_diff / 1024 / interval, 2)
+    
+#     system_data = {
+#         "CPU Usage (%)": psutil.cpu_percent(interval=1),
+#         "GPU Usage (%)": get_gpu_utilization(),
+#         "RAM Usage (%)": psutil.virtual_memory().percent,
+#         "Disk Usage (%)": psutil.disk_usage('/').percent,
+#         "KB/s Sent": kb_sent_per_sec,
+#         "KB/s Received": kb_recv_per_sec
+#     }
+
+#     print(system_data["CPU Usage (%)"])
+
+#     return JsonResponse(system_data)
+
+@api_view(['GET'])
 def get_metrics(request):
-    """Fetch real-time system metrics."""
+    """Fetch the latest row of system monitor data."""
+    try:
+        latest_record = SystemMonitor.objects.latest('timestamp')
+        serializer = SystemMonitorSerializer(latest_record)
+        return Response(serializer.data)
+    except SystemMonitor.DoesNotExist:
+        return Response({'error': 'No records found'}, status=404)
     
-    interval = 1
-    
-    net_io_start = psutil.net_io_counters()
-    bytes_sent_start = net_io_start.bytes_sent
-    bytes_recv_start = net_io_start.bytes_recv
-    
-    time.sleep(interval)
-    
-    net_io_end = psutil.net_io_counters()
-    bytes_sent_end = net_io_end.bytes_sent
-    bytes_recv_end = net_io_end.bytes_recv
-    
-    bytes_sent_diff = bytes_sent_end - bytes_sent_start
-    bytes_recv_diff = bytes_recv_end - bytes_recv_start
-    
-    kb_sent_per_sec = round(bytes_sent_diff / 1024 / interval, 2)
-    kb_recv_per_sec = round(bytes_recv_diff / 1024 / interval, 2)
-    
-    system_data = {
-        "CPU Usage (%)": psutil.cpu_percent(interval=1),
-        "GPU Usage (%)": get_gpu_utilization(),
-        "RAM Usage (%)": psutil.virtual_memory().percent,
-        "Disk Usage (%)": psutil.disk_usage('/').percent,
-        "KB/s Sent": kb_sent_per_sec,
-        "KB/s Received": kb_recv_per_sec
-    }
-    return JsonResponse(system_data)
 
 def get_system_monitor_data(request):
     duration_map = {

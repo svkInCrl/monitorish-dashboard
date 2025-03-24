@@ -11,6 +11,7 @@ interface PerformanceChartProps {
   timePeriod: TimePeriod;
 }
 
+
 export function PerformanceChart({
   data,
   isLoading,
@@ -26,6 +27,12 @@ export function PerformanceChart({
       default: return "selected period";
     }
   };
+  // const currentTime = new Date().toTimeString()
+  // console.log(currentTime)
+  // data = null;
+  // console.log(data);
+  data = data.slice(-60);
+  console.log(data);
   
   return (
     <Card>

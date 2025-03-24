@@ -21,9 +21,9 @@ export function MetricsDashboard({
     <div className="grid gap-4 md:grid-cols-4">
       <MetricCard
         title="CPU Usage"
-        value={metrics?.["CPU Usage (%)"] ?? 0}
+        value={metrics?.["cpu_usage"] ?? 0}
         icon={CpuIcon}
-        progress={metrics?.["CPU Usage (%)"]}
+        progress={metrics?.['cpu_usage']}
         subtitle={
           systemDetails
             ? `${systemDetails.cpu_count} Cores @ ${systemDetails.cpu_freq.toFixed(
@@ -35,9 +35,9 @@ export function MetricsDashboard({
       />
       <MetricCard
         title="Memory Usage"
-        value={metrics?.["RAM Usage (%)"] ?? 0}
+        value={metrics?.["ram_usage"] ?? 0}
         icon={Server}
-        progress={metrics?.["RAM Usage (%)"]}
+        progress={metrics?.["ram_usage"]}
         subtitle={
           systemDetails ? `${systemDetails.ram_size.toFixed(1)} GB RAM` : "Memory"
         }
@@ -45,9 +45,9 @@ export function MetricsDashboard({
       />
       <MetricCard
         title="Disk Usage"
-        value={metrics?.["Disk Usage (%)"] ?? 0}
+        value={metrics?.["disk_usage"] ?? 0}
         icon={HardDrive}
-        progress={metrics?.["Disk Usage (%)"]}
+        progress={metrics?.["disk_usage"]}
         subtitle="Storage"
         loading={isLoading}
       />
@@ -56,8 +56,8 @@ export function MetricsDashboard({
         value={
           isLoading
             ? "0"
-            : `↑ ${metrics?.["KB/s Sent"].toFixed(2)} KB/s\n↓ ${metrics?.[
-                "KB/s Received"
+            : `↑ ${metrics?.["kb_sent"].toFixed(2)} KB/s\n↓ ${metrics?.[
+                "kb_sent"
               ].toFixed(2)} KB/s`
         }
         icon={Network}

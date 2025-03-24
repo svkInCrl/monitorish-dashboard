@@ -57,7 +57,7 @@ export function MetricsDashboard({
           isLoading
             ? "0"
             : `↑ ${metrics?.["kb_sent"].toFixed(2)} KB/s\n↓ ${metrics?.[
-                "kb_sent"
+                "kb_received"
               ].toFixed(2)} KB/s`
         }
         icon={Network}

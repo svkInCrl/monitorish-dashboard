@@ -15,6 +15,9 @@ export function NetworkActivityChart({
   isLoading,
   timePeriod,
 }: NetworkActivityChartProps) {
+
+  data = data.slice(-60);
+
   return (
     <Card>
       <CardHeader>
@@ -60,6 +63,7 @@ export function NetworkActivityChart({
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
                   dot={false}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -69,6 +73,7 @@ export function NetworkActivityChart({
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
                   dot={false}
+                  isAnimationActive={false}
                   />
               </LineChart>
             </ResponsiveContainer>

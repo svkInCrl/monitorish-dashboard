@@ -32,7 +32,6 @@ export function PerformanceChart({
   // data = null;
   // console.log(data);
   data = data.slice(-60);
-  console.log(data);
   
   return (
     <Card>
@@ -74,6 +73,7 @@ export function PerformanceChart({
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
                   dot={false}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -82,6 +82,7 @@ export function PerformanceChart({
                   stroke="#8B5CF6"
                   strokeWidth={2}
                   dot={false}
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>

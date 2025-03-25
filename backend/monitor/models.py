@@ -14,8 +14,6 @@ class HardwareChangeTracking(models.Model):
     hw_type = models.CharField(max_length=255, blank=True, null=True)
     hw_description = models.TextField(blank=True, null=True)
     hw_status = models.CharField(max_length=50)
-    battery_percentage = models.IntegerField(blank=True, null=True)
-    power_source = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -24,18 +22,14 @@ class HardwareChangeTracking(models.Model):
 
 
 class InitialHardwareConfig(models.Model):
-    timestamp = models.DateTimeField(primary_key=True)  # The composite primary key (timestamp, hw_id, hw_status) found, that is not supported. The first column is selected.
-    hw_id = models.CharField(max_length=255)
+    timestamp = models.DateTimeField()
+    hw_id = models.CharField(max_length=255, primary_key=True)
     hw_type = models.CharField(max_length=255, blank=True, null=True)
     hw_description = models.TextField(blank=True, null=True)
-    hw_status = models.CharField(max_length=50)
-    battery_percentage = models.IntegerField(blank=True, null=True)
-    power_source = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'Initial_Hardware_Config'
-        unique_together = (('timestamp', 'hw_id', 'hw_status'),)
 
 
 class AuthGroup(models.Model):

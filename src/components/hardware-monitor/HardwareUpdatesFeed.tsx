@@ -15,7 +15,7 @@ interface HardwareUpdatesFeedProps {
 
 export function HardwareUpdatesFeed({ updates, isConnected, error }: HardwareUpdatesFeedProps) {
   return (
-    <Card className="h-full">
+    <Card className="h-full w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -50,21 +50,22 @@ export function HardwareUpdatesFeed({ updates, isConnected, error }: HardwareUpd
                 className="p-3 border rounded-md bg-card"
               >
                 <div className="flex items-start gap-2">
-                  {update.HW_Status === "Connected" ? (
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                  ) : (
+                  {update.hw_status?.includes("Blocked") ? (
                     <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                  ) : update.hw_status?.includes("Connected") ? (
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                  ) : ( <CheckCircle className="h-5 w-5 text-red-500 mt-0.5" />
                   )}
                   <div className="flex-1">
                     <div className="flex justify-between">
-                      <p className="font-medium">{update.HW_Description}</p>
+                      <p className="font-medium">{update.hw_description}</p>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(update.timestamp), "HH:mm:ss")}
+                        {update.timestamp}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>{update.HW_Status}</span>
-                      <span className="text-muted-foreground">ID: {update.HW_ID}</span>
+                      <span>{update.hw_status}</span>
+                      <span className="text-muted-foreground">ID: {update.hw_id}</span>
                     </div>
                   </div>
                 </div>

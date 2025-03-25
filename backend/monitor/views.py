@@ -68,6 +68,17 @@ class ProcessResourceListView(ListAPIView):
 class SystemDetailsListView(ListAPIView):
     queryset = SystemDetails.objects.all()
     serializer_class = SystemDetailsSerializer
+
+def get_temperatures(request):
+    """Fetch system temperature data and return as JSON."""
+    try:
+        temps = psutil.sensors_temperatures()
+        
+        return JsonResponse({"temperatures": temps['acpitz'][0].current})
+
+    except AttributeError:
+        return JsonResponse({"error": "Temperature sensing is not supported on this system."}, status=500)
+
     
 # def get_metrics(request):
 #     """Fetch real-time system metrics."""
@@ -167,63 +178,32 @@ def process_count(request):
 def get_timestamp():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-def get_usb_devices():
-    result = subprocess.run(['lsusb'], stdout=subprocess.PIPE)
-    devices = result.stdout.decode('utf-8').splitlines()
-    formatted_devices = []
-    for device in devices:
-        parts = device.split()
-        if len(parts) < 6:
-            continue
-        hw_id = parts[5]
-        hw_type = "USB Device"
-        hw_description = " ".join(parts[6:])
-        formatted_devices.append({
-            "HW_ID": hw_id,
-            "HW_Type": hw_type,
-            "HW_Description": hw_description,
-            "HW_Status": "Connected"
-        })
-    return formatted_devices
-
-def store_hardware_change(timestamp, hw_id, hw_type, hw_description, hw_status):
-    """Stores hardware changes in the database."""
-    try:
-        HardwareChangeTracking.objects.create(
-            timestamp=timestamp,
-            hw_id=hw_id,
-            hw_type=hw_type,
-            hw_description=hw_description,
-            hw_status=hw_status
-        )
-    except Exception as e:
-        print(f"Database Error (Change Tracking): {e}")
-
 def sse_stream_hardware(request):
-    """SSE endpoint for a single client streaming real-time hardware updates."""
-    def event_stream():
-        previous_hardware = set()
+    def stream_hardware_updates():
+        """Stream real-time updates from HardwareChangeTracking."""
+        last_timestamp = HardwareChangeTracking.objects.latest('timestamp').timestamp if HardwareChangeTracking.objects.exists() else None
+
         while True:
-            try:
-                current_hardware = set(tuple(d.items()) for d in get_usb_devices())
-                new_hardware = current_hardware - previous_hardware
-                removed_hardware = previous_hardware - current_hardware
-                for device in new_hardware:
-                    device_dict = dict(device)
-                    timestamp = get_timestamp()
-                    store_hardware_change(timestamp, device_dict["HW_ID"], device_dict["HW_Type"], device_dict["HW_Description"], "Connected")
-                    yield f"data: {JsonResponse({"timestamp": timestamp, "HW_ID": device_dict["HW_ID"], "HW_Status": "Connected", "HW_Description" : device_dict["HW_Description"]}).content.decode()}\n\n"
-                for device in removed_hardware:
-                    device_dict = dict(device)
-                    timestamp = get_timestamp()
-                    store_hardware_change(timestamp, device_dict["HW_ID"], device_dict["HW_Type"], device_dict["HW_Description"], "Disconnected")
-                    yield f"data: {JsonResponse({"timestamp": timestamp, "HW_ID": device_dict["HW_ID"], "HW_Status": "Disconnected", "HW_Description" : device_dict["HW_Description"]}).content.decode()}\n\n"
-                previous_hardware = current_hardware
-                time.sleep(2)
-            except Exception as e:
-                print(f"Error: {e}")
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    print(response)
+            # Get new hardware changes
+            if last_timestamp:
+                new_changes = HardwareChangeTracking.objects.filter(timestamp__gt=last_timestamp).order_by('timestamp')
+            else:
+                new_changes = HardwareChangeTracking.objects.all().order_by('timestamp')
+
+            if new_changes.exists():
+                for change in new_changes:
+                    data = {
+                        "timestamp": change.timestamp.strftime('%d-%m-%Y %H:%M:%S'),
+                        "hw_id": change.hw_id,
+                        "hw_type": change.hw_type,
+                        "hw_description": change.hw_description,
+                        "hw_status": change.hw_status,
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    last_timestamp = change.timestamp
+            time.sleep(1)  # Poll the database every 1 second
+
+    response = StreamingHttpResponse(stream_hardware_updates(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
     return response
 

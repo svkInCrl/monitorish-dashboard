@@ -12,6 +12,26 @@ const fetchHardwareInfo = async (): Promise<HardwareDevice[]> => {
   return response.json();
 };
 
+export interface TemperatureInfo {
+  temperatures: number;
+}
+
+const fetchTemperatureInfo = async (): Promise<TemperatureInfo> => {
+  const response = await fetch("http://127.0.0.1:8000/temp/");
+  if (!response.ok) {
+    throw new Error("Failed to fetch temperature information");
+  }
+  return response.json();
+};
+
+export function useTemperatureInfo() {
+  return useQuery({
+    queryKey: ["temperatureInfo"],  
+    queryFn: fetchTemperatureInfo,
+    refetchInterval: 1000, // Poll every second for real-time
+  });
+}
+
 export function useHardwareInfo() {
   return useQuery({
     queryKey: ["hardwareInfo"],
@@ -24,7 +44,23 @@ export function useHardwareUpdates() {
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  const fetchInitialData = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/hardware-change-tracking/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch hardware data");
+      }
+      const data = await response.json();
+      setUpdates(data.reverse()); // Show the latest changes first
+    } catch (err) {
+      console.error("Error fetching initial data:", err);
+      setError("Failed to fetch initial hardware data");
+    }
+  };
+
   useEffect(() => {
+    fetchInitialData();
+
     const eventSource = new EventSource("http://127.0.0.1:8000/sse_stream_hardware/");
     
     eventSource.onopen = () => {
@@ -41,9 +77,9 @@ export function useHardwareUpdates() {
           
           // Show notification for hardware changes
           toast({
-            title: `Hardware ${data.HW_Status === "Connected" ? "Connected" : "Disconnected"}`,
-            description: `${data.HW_Description} (ID: ${data.HW_ID})`,
-            variant: data.HW_Status === "Connected" ? "default" : "destructive",
+            title: `Hardware ${data.hw_status?.includes("Connected") ? "Connected" : "Disconnected"}`,
+            description: `${data.hw_description} (ID: ${data.hw_id})`,
+            variant: data.hw_status === "Connected" ? "default" : "destructive",
           });
           
           return newUpdates.slice(0, 20); // Keep only the 20 most recent updates

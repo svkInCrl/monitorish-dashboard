@@ -153,7 +153,7 @@ export default function SystemMonitor() {
 
         {/* Processes Tab */}
         <TabsContent value="processes" className="space-y-4">
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Active Processes</CardTitle>
             </CardHeader>
@@ -162,7 +162,10 @@ export default function SystemMonitor() {
                 See the Process Monitor for detailed information
               </p>
             </CardContent>
-          </Card>
+          </Card> */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <h1>Coming soon...</h1>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

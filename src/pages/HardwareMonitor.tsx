@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle, Cpu, HardDrive, MemoryStick, Server, Usb } 
 import { useHardwareInfo, useHardwareUpdates } from "@/hooks/useHardwareData";
 import { HardwareStatusTable } from "@/components/hardware-monitor/HardwareStatusTable";
 import { HardwareUpdatesFeed } from "@/components/hardware-monitor/HardwareUpdatesFeed";
+import { useTemperatureInfo } from "@/hooks/useHardwareData";
 
 // Sample data for charts
 const resourceData = [
@@ -20,6 +21,9 @@ const resourceData = [
 export default function HardwareMonitor() {
   const { data: hardwareDevices, isLoading: isLoadingDevices } = useHardwareInfo();
   const { updates, isConnected, error } = useHardwareUpdates();
+  const {data : temp, isLoading: isLoadingTemp} = useTemperatureInfo();
+
+  // console.log(temp, isLoadingTemp);
 
   return (
     <div className="space-y-8">
@@ -31,20 +35,21 @@ export default function HardwareMonitor() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+      <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">CPU Temperature</CardTitle>
             <Cpu className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">65°C</div>
-            <div className="flex items-center pt-1">
-              <span className="text-xs text-amber-500">
-                <AlertTriangle className="inline h-3 w-3 mr-1" />
-                Moderate
-              </span>
-            </div>
-            <Progress value={65} className="h-2 mt-2" />
+            {isLoadingTemp ? (
+              <div className="text-sm text-muted-foreground">Loading temperature...</div>
+            ) : (
+              <div>
+                <div className="text-2xl font-bold">{temp?.temperatures}°C</div>
+                {temp['temperatures'] > 65 ? <AlertTriangle className="inline h-3 w-3 text-amber-500 mr-1" /> : <CheckCircle className="inline text-green-500 h-3 w-3 mr-1" />}
+                {temp['temperatures'] > 65 ? <span className="text-xs text-amber-500"> High</span> : <span className="text-xs text-green-500"> Normal </span> }
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -72,7 +77,7 @@ export default function HardwareMonitor() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {hardwareDevices?.filter(d => d.hw_type.includes("Storage")).length || 2}
+              {hardwareDevices?.filter(d => d.hw_type.includes("Storage")).length || 0}
             </div>
             <div className="flex items-center pt-1">
               <span className="text-xs text-green-500">
@@ -109,16 +114,13 @@ export default function HardwareMonitor() {
         </TabsList>
         
         <TabsContent value="updates" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-1">
             <HardwareUpdatesFeed 
               updates={updates} 
               isConnected={isConnected} 
               error={error} 
             />
-            <HardwareStatusTable 
-              devices={hardwareDevices || []} 
-              isLoading={isLoadingDevices} 
-            />
+            
           </div>
         </TabsContent>
         
@@ -147,8 +149,12 @@ export default function HardwareMonitor() {
         </TabsContent>
         
         <TabsContent value="devices" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+          <div className="grid gap-4 md:grid-cols-1">
+          <HardwareStatusTable 
+              devices={hardwareDevices || []} 
+              isLoading={isLoadingDevices} 
+            />
+            {/* <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">CPU</CardTitle>
@@ -259,7 +265,7 @@ export default function HardwareMonitor() {
                   <span className="text-sm font-medium">CL16</span>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </TabsContent>
       </Tabs>

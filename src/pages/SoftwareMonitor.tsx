@@ -1,23 +1,20 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle, Clock, Code, Shield, XCircle } from "lucide-react";
-import { useSoftwareInfo } from "@/hooks/useSoftwareData";
-// Sample data
-
-const softwareData = [
-  { id: 1, name: "Chrome", version: "112.0.5615.138", status: "Running", lastUpdated: "Today", category: "Browser" },
-  { id: 2, name: "Visual Studio Code", version: "1.77.3", status: "Running", lastUpdated: "2 days ago", category: "Development" },
-  { id: 3, name: "Slack", version: "4.29.149", status: "Running", lastUpdated: "1 week ago", category: "Communication" },
-  { id: 4, name: "Spotify", version: "1.2.0.1165", status: "Not Running", lastUpdated: "3 days ago", category: "Media" },
-  { id: 5, name: "Adobe Photoshop", version: "24.5.0", status: "Not Running", lastUpdated: "2 weeks ago", category: "Design" },
-  { id: 6, name: "Node.js", version: "18.15.0", status: "Running", lastUpdated: "1 month ago", category: "Development" },
-  { id: 7, name: "Zoom", version: "5.14.7", status: "Not Running", lastUpdated: "5 days ago", category: "Communication" },
-  { id: 8, name: "Microsoft Office", version: "16.68.1", status: "Running", lastUpdated: "2 days ago", category: "Productivity" },
-];
+import { usePaginatedSoftwareInfo } from "@/hooks/useSoftwareData";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 const updateData = [
   { name: "Jan", updates: 5 },
@@ -29,11 +26,24 @@ const updateData = [
 ];
 
 export default function SoftwareMonitor() {
-  const { data : softwareInfo , isLoading: isLoadingSoftware,
-    error: softwareError,} = useSoftwareInfo();
+  const { 
+    data: softwareInfo, 
+    isLoading: isLoadingSoftware,
+    error: softwareError, 
+    pagination
+  } = usePaginatedSoftwareInfo(8);
 
-  console.log(softwareInfo);
+  const getCategoryCounts = () => {
+    return [
+      { category: "Development", percentage: 35 },
+      { category: "Productivity", percentage: 25 },
+      { category: "Communication", percentage: 20 },
+      { category: "Media", percentage: 15 },
+      { category: "Other", percentage: 5 },
+    ];
+  };
   
+  const categoryData = getCategoryCounts();
 
   return (
     <div className="space-y-8">
@@ -129,56 +139,26 @@ export default function SoftwareMonitor() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                    <p className="text-sm font-medium">Development</p>
+              {categoryData.map((item, index) => (
+                <div key={item.category} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className={`w-2 h-2 rounded-full ${
+                          index === 0 ? 'bg-blue-500' : 
+                          index === 1 ? 'bg-purple-500' : 
+                          index === 2 ? 'bg-green-500' : 
+                          index === 3 ? 'bg-yellow-500' : 
+                          'bg-red-500'
+                        }`} 
+                      />
+                      <p className="text-sm font-medium">{item.category}</p>
+                    </div>
+                    <span className="text-sm">{item.percentage}%</span>
                   </div>
-                  <span className="text-sm">35%</span>
+                  <Progress value={item.percentage} className="h-2" />
                 </div>
-                <Progress value={35} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
-                    <p className="text-sm font-medium">Productivity</p>
-                  </div>
-                  <span className="text-sm">25%</span>
-                </div>
-                <Progress value={25} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <p className="text-sm font-medium">Communication</p>
-                  </div>
-                  <span className="text-sm">20%</span>
-                </div>
-                <Progress value={20} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                    <p className="text-sm font-medium">Media</p>
-                  </div>
-                  <span className="text-sm">15%</span>
-                </div>
-                <Progress value={15} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500" />
-                    <p className="text-sm font-medium">Other</p>
-                  </div>
-                  <span className="text-sm">5%</span>
-                </div>
-                <Progress value={5} className="h-2" />
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -192,42 +172,112 @@ export default function SoftwareMonitor() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Version</TableHead>
-                <TableHead>Privilege</TableHead>
-                {/* <TableHead>Status</TableHead> */}
-                <TableHead>Last Updated</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {softwareInfo && softwareInfo.map((app) => (
-                <TableRow key={app.sw_id}>
-                  <TableCell className="font-medium">{app.sw_name}</TableCell>
-                  <TableCell>{app.version}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{app.sw_privilege}</Badge>
-                  </TableCell>
-                  {/* <TableCell>
-                    {app.status === "Running" ? (
-                      <span className="flex items-center text-green-500">
-                        <CheckCircle className="mr-1 h-4 w-4" />
-                        Running
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-gray-500">
-                        <XCircle className="mr-1 h-4 w-4" />
-                        Not Running
-                      </span>
-                    )}
-                  </TableCell> */}
-                  <TableCell>{app.installation_timestamp}</TableCell>
+          <ScrollArea className="h-[400px] rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Version</TableHead>
+                  <TableHead>Privilege</TableHead>
+                  <TableHead>Last Updated</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoadingSoftware ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">Loading software data...</TableCell>
+                  </TableRow>
+                ) : softwareError ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-red-500">
+                      Error loading software data
+                    </TableCell>
+                  </TableRow>
+                ) : softwareInfo && softwareInfo.length > 0 ? (
+                  softwareInfo.map((app) => (
+                    <TableRow key={app.sw_id}>
+                      <TableCell className="font-medium">{app.sw_name}</TableCell>
+                      <TableCell>{app.version}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{app.sw_privilege}</Badge>
+                      </TableCell>
+                      <TableCell>{app.installation_timestamp}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">No software data available</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+          
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={pagination.prevPage} 
+                    className={pagination.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {pagination.currentPage > 2 && (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => pagination.goToPage(1)}>1</PaginationLink>
+                  </PaginationItem>
+                )}
+                
+                {pagination.currentPage > 3 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                
+                {pagination.currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => pagination.goToPage(pagination.currentPage - 1)}>
+                      {pagination.currentPage - 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+                
+                <PaginationItem>
+                  <PaginationLink isActive>{pagination.currentPage}</PaginationLink>
+                </PaginationItem>
+                
+                {pagination.currentPage < pagination.totalPages && (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => pagination.goToPage(pagination.currentPage + 1)}>
+                      {pagination.currentPage + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+                
+                {pagination.currentPage < pagination.totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                
+                {pagination.currentPage < pagination.totalPages - 1 && (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => pagination.goToPage(pagination.totalPages)}>
+                      {pagination.totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={pagination.nextPage} 
+                    className={pagination.currentPage >= pagination.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </CardContent>
       </Card>
     </div>

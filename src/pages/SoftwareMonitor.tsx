@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle, Clock, Code, Shield, XCircle } from "lucide-react";
 import { usePaginatedSoftwareInfo } from "@/hooks/useSoftwareData";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Pagination, 
   PaginationContent, 
@@ -172,8 +172,7 @@ export default function SoftwareMonitor() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Removed the ScrollArea wrapper to eliminate double scrolling */}
-          <div className="h-[400px] rounded-md border overflow-auto">
+          <ScrollArea className="h-[400px] rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -212,7 +211,7 @@ export default function SoftwareMonitor() {
                 )}
               </TableBody>
             </Table>
-          </div>
+          </ScrollArea>
           
           <div className="mt-4">
             <Pagination>

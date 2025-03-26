@@ -34,6 +34,9 @@ export default function SoftwareMonitor() {
     pagination
   } = usePaginatedSoftwareInfo(8);
 
+  console.log(softwareInfo);
+  
+
   const getCategoryCounts = () => {
     return [
       { category: "Development", percentage: 35 },
@@ -62,7 +65,7 @@ export default function SoftwareMonitor() {
             <Code className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{softwareInfo?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
               Applications tracked
             </p>
@@ -95,7 +98,7 @@ export default function SoftwareMonitor() {
       </div>
 
       <Tabs defaultValue="installed" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid grid-cols-3 md:grid-cols-3 lg:w-[550px]">
           <TabsTrigger value="installed" className="flex items-center gap-2">
             <ListVideo className="h-4 w-4" />
             <span>Installed Software</span>

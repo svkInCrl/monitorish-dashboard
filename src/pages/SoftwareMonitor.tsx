@@ -1,10 +1,10 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle, Clock, Code, ListVideo, History, Layers, Shield, XCircle } from "lucide-react";
+import { CheckCircle, Clock, Code, ListVideo, History, Layers, Shield, XCircle, Search } from "lucide-react";
 import { usePaginatedSoftwareInfo } from "@/hooks/useSoftwareData";
 import { 
   Pagination, 
@@ -16,6 +16,7 @@ import {
   PaginationPrevious 
 } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useMemo } from "react";
 
 const updateData = [
   { name: "Jan", updates: 5 },
@@ -27,6 +28,8 @@ const updateData = [
 ];
 
 export default function SoftwareMonitor() {
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const { 
     data: softwareInfo, 
     isLoading: isLoadingSoftware,
@@ -34,8 +37,16 @@ export default function SoftwareMonitor() {
     pagination
   } = usePaginatedSoftwareInfo(8);
 
-  console.log(softwareInfo);
-  
+  const filteredSoftware = useMemo(() => {
+    if (!softwareInfo || !searchTerm.trim()) return softwareInfo;
+    
+    const term = searchTerm.toLowerCase().trim();
+    return softwareInfo.filter(app => 
+      app.sw_name.toLowerCase().includes(term) || 
+      app.version.toLowerCase().includes(term) || 
+      app.sw_privilege.toLowerCase().includes(term)
+    );
+  }, [softwareInfo, searchTerm]);
 
   const getCategoryCounts = () => {
     return [
@@ -122,6 +133,16 @@ export default function SoftwareMonitor() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 flex items-center relative">
+                <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search software..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-full max-w-sm"
+                />
+              </div>
+              
               <div className="h-[400px] overflow-auto rounded-md border">
                 <Table>
                   <TableHeader>
@@ -143,8 +164,8 @@ export default function SoftwareMonitor() {
                           Error loading software data
                         </TableCell>
                       </TableRow>
-                    ) : softwareInfo && softwareInfo.length > 0 ? (
-                      softwareInfo.map((app) => (
+                    ) : filteredSoftware && filteredSoftware.length > 0 ? (
+                      filteredSoftware.map((app) => (
                         <TableRow key={app.sw_id}>
                           <TableCell className="font-medium">{app.sw_name}</TableCell>
                           <TableCell>{app.version}</TableCell>
@@ -156,7 +177,11 @@ export default function SoftwareMonitor() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center">No software data available</TableCell>
+                        <TableCell colSpan={4} className="text-center">
+                          {softwareInfo && softwareInfo.length > 0 
+                            ? "No matching software found" 
+                            : "No software data available"}
+                        </TableCell>
                       </TableRow>
                     )}
                   </TableBody>

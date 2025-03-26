@@ -18,18 +18,18 @@ export function HardwareNotifications() {
         
         // Determine icon based on device description
         let iconDescription = "";
-        if (data.HW_Description?.toLowerCase().includes("usb")) {
+        if (data.hw_description?.toLowerCase().includes("usb")) {
           iconDescription = "🔌 USB";
-        } else if (data.HW_Description?.toLowerCase().includes("wifi") || data.HW_Description?.toLowerCase().includes("network")) {
+        } else if (data.hw_description?.toLowerCase().includes("wifi") || data.hw_description?.toLowerCase().includes("network")) {
           iconDescription = "📶 Network";
         } else {
           iconDescription = "🖥️ Device";
         }
         
         toast({
-          title: `${iconDescription} ${data.HW_Status === "Connected" ? "Connected" : "Disconnected"}`,
-          description: `${data.HW_Description || "Unknown device"} (ID: ${data.HW_ID})`,
-          variant: data.HW_Status === "Connected" ? "default" : "destructive",
+          title: `${iconDescription} ${data.hw_status === "Connected" ? "Connected" : "Disconnected"}`,
+          description: `${data.hw_description || "Unknown device"} (ID: ${data.hw_id})`,
+          variant: data.hw_status === "Connected" ? "default" : "destructive",
         });
       } catch (err) {
         console.error("Error parsing SSE data:", err);

@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle, Clock, Code, ListVideo, History, Category, Shield, XCircle } from "lucide-react";
+import { CheckCircle, Clock, Code, ListVideo, History, Layers, Shield, XCircle } from "lucide-react";
 import { usePaginatedSoftwareInfo } from "@/hooks/useSoftwareData";
 import { 
   Pagination, 
@@ -105,7 +105,7 @@ export default function SoftwareMonitor() {
             <span>Update History</span>
           </TabsTrigger>
           <TabsTrigger value="categories" className="flex items-center gap-2">
-            <Category className="h-4 w-4" />
+            <Layers className="h-4 w-4" />
             <span>Software Categories</span>
           </TabsTrigger>
         </TabsList>

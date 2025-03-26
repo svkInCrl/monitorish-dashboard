@@ -34,6 +34,11 @@ class InitialHardwareConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitialHardwareConfig
         fields = '__all__'
+
+class InstalledSoftwareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstalledSoftware
+        fields = '__all__'
         
 class SoftwareMonitorSerializer(serializers.ModelSerializer):
     class Meta:

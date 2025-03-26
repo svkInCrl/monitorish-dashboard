@@ -137,9 +137,11 @@ export default function SystemMonitor() {
 
         {/* Storage Tab */}
         <TabsContent value="storage" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <h1>Coming soon...</h1>
-          </div>
+          <Card>
+            <CardHeader>
+              Coming soon ..
+            </CardHeader>
+          </Card>
         </TabsContent>
 
         {/* Network Tab */}
@@ -153,19 +155,17 @@ export default function SystemMonitor() {
 
         {/* Processes Tab */}
         <TabsContent value="processes" className="space-y-4">
-          {/* <Card>
+          <Card>
             <CardHeader>
-              <CardTitle>Active Processes</CardTitle>
+              {/* <CardTitle>Active Processes</CardTitle> */}
+              Coming soon ..
             </CardHeader>
-            <CardContent>
+            {/* <CardContent>
               <p className="text-center py-8 text-muted-foreground">
                 See the Process Monitor for detailed information
               </p>
-            </CardContent>
-          </Card> */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <h1>Coming soon...</h1>
-          </div>
+            </CardContent> */}
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

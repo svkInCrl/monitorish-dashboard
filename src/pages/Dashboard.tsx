@@ -6,6 +6,11 @@ import { Activity, CpuIcon, HardDrive, MonitorIcon, Server, Users } from "lucide
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useProcessInfo } from "@/hooks/useProcessData";
+import { useHistoricalMetrics } from "@/hooks/useMetrics";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 // Sample data for charts
 const performanceData = [
@@ -21,9 +26,35 @@ const performanceData = [
 export default function Dashboard() {
   const { data: systemDetails, isLoading, error } = useSystemDetails();
   const { data: processes, isLoading: isLoadingProcesses } = useProcessInfo();
+  const {
+      data: historicalMetrics,
+      isLoading: isLoadingHistorical,
+      error: historicalError,
+    } = useHistoricalMetrics('live');
   
   // Use only the first object from the array if available
   const systemInfo = systemDetails?.[0];
+
+  const formatHistoricalData = () => {
+      if (!historicalMetrics || historicalMetrics.length === 0) {
+        return performanceData;
+      }
+  
+      return historicalMetrics.map((metric) => ({
+        // ✅ Correct conversion from UTC to local time
+        name: metric.timestamp
+          ? dayjs.utc(metric.timestamp).format("HH:mm:ss")
+          : "",
+        cpu: metric["cpu_usage"],
+        ram: metric["ram_usage"],
+        gpu: metric["gpu_usage"],
+        disk: metric["disk_usage"],
+        upload: metric["kb_sent"],
+        download: metric["kb_received"],
+      }));
+    };
+
+  const chartData = formatHistoricalData().slice(-60);
 
   const stats = [
     {
@@ -174,7 +205,7 @@ export default function Dashboard() {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={performanceData}
+                  data={chartData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -196,7 +227,7 @@ export default function Dashboard() {
                   />
                   <Line
                     type="monotone"
-                    dataKey="memory"
+                    dataKey="ram"
                     stroke="#8B5CF6"
                     strokeWidth={2}
                   />

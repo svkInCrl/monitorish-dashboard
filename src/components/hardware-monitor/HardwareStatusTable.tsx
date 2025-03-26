@@ -17,7 +17,7 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Hardware Status</CardTitle>
+          <CardTitle>Initial Hardware Status</CardTitle>
           <CardDescription>Loading hardware information...</CardDescription>
         </CardHeader>
         <CardContent>
@@ -33,7 +33,7 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Hardware Status</CardTitle>
+          <CardTitle>Initial Hardware Status</CardTitle>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
@@ -51,7 +51,7 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Hardware Status</CardTitle>
+        <CardTitle>Initial Hardware Status</CardTitle>
         <CardDescription>Current hardware devices and their status</CardDescription>
       </CardHeader>
       <CardContent>
@@ -59,7 +59,7 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Status</TableHead>
+                {/* <TableHead>Status</TableHead> */}
                 <TableHead>Device Type</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>ID</TableHead>
@@ -69,16 +69,16 @@ export function HardwareStatusTable({ devices, isLoading }: HardwareStatusTableP
               <TableBody>
                 {devices.map((device) => (
                   <TableRow key={device.hw_id}>
-                    <TableCell>
-                      <div className="flex items-center">
+                    {/* <TableCell> */}
+                      {/* <div className="flex items-center">
                         {device.hw_status === "Connected" ? (
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
                         ) : (
                           <Circle className="h-4 w-4 text-red-500 mr-2" />
                         )}
                         {device.hw_status}
-                      </div>
-                    </TableCell>
+                      </div> */}
+                    {/* </TableCell> */}
                     <TableCell>{device.hw_type}</TableCell>
                     <TableCell>{device.hw_description}</TableCell>
                     <TableCell>{device.hw_id}</TableCell>

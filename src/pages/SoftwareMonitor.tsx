@@ -5,8 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle, Clock, Code, Shield, XCircle } from "lucide-react";
-
+import { useSoftwareInfo } from "@/hooks/useSoftwareData";
 // Sample data
+
 const softwareData = [
   { id: 1, name: "Chrome", version: "112.0.5615.138", status: "Running", lastUpdated: "Today", category: "Browser" },
   { id: 2, name: "Visual Studio Code", version: "1.77.3", status: "Running", lastUpdated: "2 days ago", category: "Development" },
@@ -28,6 +29,12 @@ const updateData = [
 ];
 
 export default function SoftwareMonitor() {
+  const { data : softwareInfo , isLoading: isLoadingSoftware,
+    error: softwareError,} = useSoftwareInfo();
+
+  console.log(softwareInfo);
+  
+
   return (
     <div className="space-y-8">
       <div>
@@ -190,20 +197,20 @@ export default function SoftwareMonitor() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Version</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Privilege</TableHead>
+                {/* <TableHead>Status</TableHead> */}
                 <TableHead>Last Updated</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {softwareData.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell className="font-medium">{app.name}</TableCell>
+              {softwareInfo && softwareInfo.map((app) => (
+                <TableRow key={app.sw_id}>
+                  <TableCell className="font-medium">{app.sw_name}</TableCell>
                   <TableCell>{app.version}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{app.category}</Badge>
+                    <Badge variant="outline">{app.sw_privilege}</Badge>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     {app.status === "Running" ? (
                       <span className="flex items-center text-green-500">
                         <CheckCircle className="mr-1 h-4 w-4" />
@@ -215,8 +222,8 @@ export default function SoftwareMonitor() {
                         Not Running
                       </span>
                     )}
-                  </TableCell>
-                  <TableCell>{app.lastUpdated}</TableCell>
+                  </TableCell> */}
+                  <TableCell>{app.installation_timestamp}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

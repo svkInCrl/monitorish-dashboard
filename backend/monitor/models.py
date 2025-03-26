@@ -157,18 +157,17 @@ class FilePaths(models.Model):
 
 
 class InstalledSoftware(models.Model):
-    sw_id = models.CharField(primary_key=True, max_length=255)  # The composite primary key (sw_id, sw_name) found, that is not supported. The first column is selected.
-    sw_name = models.CharField(max_length=255)
+    sw_id = models.CharField(primary_key=True, max_length=255)
+    package_manager = models.CharField(max_length=20, blank=True, null=True)
+    sw_name = models.CharField(max_length=255, blank=True, null=True)
     sw_privilege = models.CharField(max_length=50, blank=True, null=True)
-    path = models.CharField(max_length=255)
+    path = models.CharField(max_length=255, blank=True, null=True)
     installation_timestamp = models.DateTimeField(blank=True, null=True)
-    libraries = models.TextField(blank=True, null=True)
-    version = models.CharField(max_length=100, blank=True, null=True)
+    version = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'installed_software'
-        unique_together = (('sw_id', 'sw_name'),)
 
 
 class LogFileMonitoring(models.Model):
@@ -295,12 +294,13 @@ class ProcessResources(models.Model):
 
 class SoftwareMonitor(models.Model):
     sw_id = models.CharField(max_length=255, blank=True, null=True)
-    sw_name = models.TextField(blank=True, null=True)
-    sw_privileges = models.TextField(blank=True, null=True)
-    sw_path = models.TextField(blank=True, null=True)
-    libraries = models.TextField(blank=True, null=True)
+    package_manager = models.CharField(max_length=20, blank=True, null=True)
+    sw_name = models.CharField(max_length=255, blank=True, null=True)
+    sw_privilege = models.CharField(max_length=50, blank=True, null=True)
+    sw_path = models.CharField(max_length=255, blank=True, null=True)
+    version = models.CharField(max_length=50, blank=True, null=True)
+    action = models.CharField(max_length=20, blank=True, null=True)
     timestamp = models.DateTimeField(blank=True, null=True)
-    version = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

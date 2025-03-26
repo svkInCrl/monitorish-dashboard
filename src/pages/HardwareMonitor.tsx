@@ -127,12 +127,13 @@ export default function HardwareMonitor() {
         <TabsContent value="resources" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Resource Usage</CardTitle>
+              {/* {/* <CardTitle>Resource Usage</CardTitle>
               <CardDescription>
                 Current hardware utilization
-              </CardDescription>
+              </CardDescription> */}
+              Coming soon ..
             </CardHeader>
-            <CardContent>
+            {/* <CardContent>
               <div className="space-y-4">
                 {resourceData.map((resource) => (
                   <div key={resource.name} className="space-y-2">
@@ -144,7 +145,7 @@ export default function HardwareMonitor() {
                   </div>
                 ))}
               </div>
-            </CardContent>
+            </CardContent> */} 
           </Card>
         </TabsContent>
         

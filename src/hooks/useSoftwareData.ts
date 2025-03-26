@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { HardwareDevice, HardwareUpdate } from "@/types/hardware";
@@ -33,24 +34,24 @@ export function useSoftwareInfo() {
 
 // Pagination helper hook to handle paginated software data
 export function usePaginatedSoftwareInfo(pageSize = 5) {
-  const { data, isLoading, error } = useSoftwareInfo();
+  const { data: rawData, isLoading, error } = useSoftwareInfo();
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedData, setPaginatedData] = useState<SoftwareInfo[]>([]);
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    if (data) {
-      setTotalPages(Math.ceil(data.length / pageSize));
+    if (rawData) {
+      setTotalPages(Math.ceil(rawData.length / pageSize));
       
       // Ensure current page is valid
-      const validCurrentPage = Math.min(currentPage, Math.ceil(data.length / pageSize));
+      const validCurrentPage = Math.min(currentPage, Math.ceil(rawData.length / pageSize));
       
       // Calculate page slice
       const startIndex = (validCurrentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
-      setPaginatedData(data.slice(startIndex, endIndex));
+      setPaginatedData(rawData.slice(startIndex, endIndex));
     }
-  }, [data, currentPage, pageSize]);
+  }, [rawData, currentPage, pageSize]);
 
   // Page navigation functions
   const goToPage = (page: number) => {
@@ -65,7 +66,7 @@ export function usePaginatedSoftwareInfo(pageSize = 5) {
 
   return {
     data: paginatedData,
-    rawData: data,
+    rawData, // Expose the full dataset for global search
     isLoading,
     error,
     pagination: {

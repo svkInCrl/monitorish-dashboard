@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,7 +17,7 @@ import {
   PaginationPrevious 
 } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const updateData = [
   { name: "Jan", updates: 5 },
@@ -29,24 +30,55 @@ const updateData = [
 
 export default function SoftwareMonitor() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
   
   const { 
     data: softwareInfo, 
     isLoading: isLoadingSoftware,
-    error: softwareError, 
-    pagination
-  } = usePaginatedSoftwareInfo(8);
+    error: softwareError,
+    rawData
+  } = usePaginatedSoftwareInfo(pageSize);
 
+  // Filter the full dataset based on search term
   const filteredSoftware = useMemo(() => {
-    if (!softwareInfo || !searchTerm.trim()) return softwareInfo;
+    if (!rawData || !searchTerm.trim()) return rawData;
     
     const term = searchTerm.toLowerCase().trim();
-    return softwareInfo.filter(app => 
+    return rawData.filter(app => 
       app.sw_name.toLowerCase().includes(term) || 
       app.version.toLowerCase().includes(term) || 
       app.sw_privilege.toLowerCase().includes(term)
     );
-  }, [softwareInfo, searchTerm]);
+  }, [rawData, searchTerm]);
+
+  // Calculate pagination properties
+  const totalResults = filteredSoftware?.length || 0;
+  const totalPages = Math.ceil(totalResults / pageSize);
+
+  // Update filtered data when search term or page changes
+  useEffect(() => {
+    if (filteredSoftware) {
+      // Reset to first page when search term changes
+      if (searchTerm.trim() && currentPage !== 1) {
+        setCurrentPage(1);
+      }
+      
+      // Calculate page slice
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      setFilteredData(filteredSoftware.slice(startIndex, endIndex));
+    }
+  }, [filteredSoftware, currentPage, pageSize, searchTerm]);
+
+  // Page navigation functions
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const nextPage = () => goToPage(currentPage + 1);
+  const prevPage = () => goToPage(currentPage - 1);
 
   const getCategoryCounts = () => {
     return [
@@ -164,8 +196,8 @@ export default function SoftwareMonitor() {
                           Error loading software data
                         </TableCell>
                       </TableRow>
-                    ) : filteredSoftware && filteredSoftware.length > 0 ? (
-                      filteredSoftware.map((app) => (
+                    ) : filteredData && filteredData.length > 0 ? (
+                      filteredData.map((app) => (
                         <TableRow key={app.sw_id}>
                           <TableCell className="font-medium">{app.sw_name}</TableCell>
                           <TableCell>{app.version}</TableCell>
@@ -178,7 +210,7 @@ export default function SoftwareMonitor() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center">
-                          {softwareInfo && softwareInfo.length > 0 
+                          {rawData && rawData.length > 0 
                             ? "No matching software found" 
                             : "No software data available"}
                         </TableCell>
@@ -193,61 +225,61 @@ export default function SoftwareMonitor() {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious 
-                        onClick={pagination.prevPage} 
-                        className={pagination.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        onClick={prevPage} 
+                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       />
                     </PaginationItem>
                     
-                    {pagination.currentPage > 2 && (
+                    {currentPage > 2 && (
                       <PaginationItem>
-                        <PaginationLink onClick={() => pagination.goToPage(1)}>1</PaginationLink>
+                        <PaginationLink onClick={() => goToPage(1)}>1</PaginationLink>
                       </PaginationItem>
                     )}
                     
-                    {pagination.currentPage > 3 && (
+                    {currentPage > 3 && (
                       <PaginationItem>
                         <PaginationEllipsis />
                       </PaginationItem>
                     )}
                     
-                    {pagination.currentPage > 1 && (
+                    {currentPage > 1 && (
                       <PaginationItem>
-                        <PaginationLink onClick={() => pagination.goToPage(pagination.currentPage - 1)}>
-                          {pagination.currentPage - 1}
+                        <PaginationLink onClick={() => goToPage(currentPage - 1)}>
+                          {currentPage - 1}
                         </PaginationLink>
                       </PaginationItem>
                     )}
                     
                     <PaginationItem>
-                      <PaginationLink isActive>{pagination.currentPage}</PaginationLink>
+                      <PaginationLink isActive>{currentPage}</PaginationLink>
                     </PaginationItem>
                     
-                    {pagination.currentPage < pagination.totalPages && (
+                    {currentPage < totalPages && (
                       <PaginationItem>
-                        <PaginationLink onClick={() => pagination.goToPage(pagination.currentPage + 1)}>
-                          {pagination.currentPage + 1}
+                        <PaginationLink onClick={() => goToPage(currentPage + 1)}>
+                          {currentPage + 1}
                         </PaginationLink>
                       </PaginationItem>
                     )}
                     
-                    {pagination.currentPage < pagination.totalPages - 2 && (
+                    {currentPage < totalPages - 2 && (
                       <PaginationItem>
                         <PaginationEllipsis />
                       </PaginationItem>
                     )}
                     
-                    {pagination.currentPage < pagination.totalPages - 1 && (
+                    {currentPage < totalPages - 1 && (
                       <PaginationItem>
-                        <PaginationLink onClick={() => pagination.goToPage(pagination.totalPages)}>
-                          {pagination.totalPages}
+                        <PaginationLink onClick={() => goToPage(totalPages)}>
+                          {totalPages}
                         </PaginationLink>
                       </PaginationItem>
                     )}
                     
                     <PaginationItem>
                       <PaginationNext 
-                        onClick={pagination.nextPage} 
-                        className={pagination.currentPage >= pagination.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        onClick={nextPage} 
+                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       />
                     </PaginationItem>
                   </PaginationContent>

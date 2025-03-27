@@ -125,9 +125,9 @@ export default function SoftwareMonitor() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Coming soon ..</div>
+            <div className="text-2xl font-bold">8</div>
             <p className="text-xs text-muted-foreground">
-              
+              Updated
             </p>
           </CardContent>
         </Card>
@@ -297,7 +297,7 @@ export default function SoftwareMonitor() {
         <TabsContent value="updates" className="mt-6">
           <Card>
             <CardHeader>
-              Coming soon ..
+              {/* Coming soon .. */}
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">

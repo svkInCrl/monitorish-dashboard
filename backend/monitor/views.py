@@ -425,6 +425,27 @@ def get_process_resources(request):
     serializer = ProcessResourcesSerializer(records, many=True)
     return Response(serializer.data)
 
+@api_view(['POST'])
+def kill_process(request):
+    """Kill a process by its PID."""
+    pid = request.data.get('pid')
+    if not pid:
+        return Response({"error": "PID is required"}, status=400)
+    
+    try:
+        pid = int(pid)
+        process = psutil.Process(pid)
+        process.terminate()  # Attempt to terminate the process
+        return Response({"message": f"Process with PID {pid} terminated successfully"}, status=200)
+    except psutil.NoSuchProcess:
+        return Response({"error": f"No process found with PID {pid}"}, status=404)
+    except psutil.AccessDenied:
+        return Response({"error": f"Permission denied to terminate process with PID {pid}"}, status=403)
+    except ValueError:
+        return Response({"error": "Invalid PID format"}, status=400)
+    except Exception as e:
+        return Response({"error": f"An error occurred: {str(e)}"}, status=500)
+
 # @api_view(['GET'])
 # def get_live_data(request):
 #     """Fetch live hardware data from Redis."""

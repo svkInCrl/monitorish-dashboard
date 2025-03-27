@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import delete_file,get_temperatures, SystemDetailsListView,sse_process_activity, sse_file_activity, sse_window_activity, sse_stream_hardware, process_count, get_metrics, get_historical_data, get_system_monitor_data, ProcessInfoListView, SoftwareInfoListView, InitialHardwareConfigListView, HardwareChangeTrackingListView, ProcessResourceListView, critical_files
+from .views import delete_file,get_temperatures, kill_process, SystemDetailsListView,sse_process_activity, sse_file_activity, sse_window_activity, sse_stream_hardware, process_count, get_metrics, get_historical_data, get_system_monitor_data, ProcessInfoListView, SoftwareInfoListView, InitialHardwareConfigListView, HardwareChangeTrackingListView, ProcessResourceListView, critical_files
 
 urlpatterns = [
     path('metrics/', get_metrics, name='get_metrics'),
@@ -21,5 +21,6 @@ urlpatterns = [
     path('sse_window_activity/', sse_window_activity, name = 'window_activity'),
     path('temp/', get_temperatures, name='temp'),
     path('process_resources/', ProcessResourceListView.as_view(), name='process_resources'),
+    path('kill_process/<int:pid>', kill_process, name='kill_process'),
 ]
 

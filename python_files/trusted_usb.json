@@ -1,0 +1,53 @@
+{
+  "devices": [
+    {
+      "vid": "0408",
+      "pid": "5483",
+      "product": "USB Device",
+      "description": "Quanta Computer, Inc. HP HD Camera"
+    },
+
+    {
+      "vid": "06cb",
+      "pid": "00f0",
+      "product": "USB Device",
+      "description": "Synaptics, Inc."
+    },
+
+    {
+      "vid": "0951",
+      "pid": "1666",
+      "product": "USB Device",
+      "description": "Kingston Technology DataTraveler 100 G3/G4/SE9 G2/50 Kyson"
+    },
+
+    {
+      "vid": "1d6b",
+      "pid": "0002",
+      "product": "USB Device",
+      "description": "Linux Foundation 2.0 root hub"
+    },
+
+    {
+      "vid": "1d6b",
+      "pid": "0003",
+      "product": "USB Device",
+      "description": "Linux Foundation 3.0 root hub"
+    },
+
+    {
+      "vid": "1ea7",
+      "pid": "0064",
+      "product": "USB Device",
+      "description": "SHARKOON Technologies GmbH 2.4GHz Wireless rechargeable vertical mouse [More&Better]"
+    },
+
+    {
+      "vid": "8087",
+      "pid": "0033",
+      "product": "USB Device",
+      "description": "Intel Corp. AX211 Bluetooth"
+    }
+
+  ]
+}

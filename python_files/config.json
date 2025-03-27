@@ -1,0 +1,32 @@
+{
+    "database": {
+      "host": "localhost",
+      "user": "root",
+      "password": "Crl@123",
+      "database": "Threat_Erase_DB"
+    },
+    "excluded_processes": [
+      "gnome-shell",
+      "systemd",
+      "Xorg"
+    ],
+    "ignored_processes": [
+      "mutter-x11-frames",
+      "ibus-x11"
+    ],
+    "ignored_users": [
+      "root",
+      "dbus"
+    ],
+    "critical_files": [
+      "/etc/passwd",
+      "/etc/shadow",
+      "/etc/hosts"
+    ],
+    "aggregation_interval": 10,
+    "log_file": "activity.log",
+    "file_monitor_paths": [
+      "/home/suraj-mishra",
+      "/var/log"
+    ]
+  }

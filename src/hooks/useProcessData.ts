@@ -51,14 +51,13 @@ const fetchProcessResources = async (): Promise<ProcessResource[]> => {
 };
 
 const killProcessById = async (pid: number): Promise<{ message: string }> => {
-  const response = await fetch("http://127.0.0.1:8000/kill_process/", {
-    method: "POST",
+  const response = await fetch(`http://127.0.0.1:8000/kill_process/${pid}`, {
+    method: "POST", // Or use "DELETE" for better semantics
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ pid }),
   });
-  
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || "Failed to terminate process");

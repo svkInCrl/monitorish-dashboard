@@ -19,11 +19,11 @@ export interface ProcessCount {
 
 export interface ProcessResource {
   pid: number;
-  cpu_usage?: number | null;
-  ram_usage?: number | null;
+  cpu_usage: number | null;
+  ram_usage: number | null;
   data_sent_mb?: number | null;
   data_received_mb?: number | null;
-  timestamp: string;
+  timestamp?: string;
 }
 
 const fetchProcessCount = async (): Promise<ProcessCount> => {
@@ -42,8 +42,8 @@ const fetchProcessInfo = async (): Promise<Process[]> => {
   return response.json();
 };
 
-const fetchProcessResource = async (): Promise<ProcessResource> => {
-  const response = await fetch("http://127.0.0.1:8000/process-resources/")
+const fetchProcessResources = async (): Promise<ProcessResource[]> => {
+  const response = await fetch("http://127.0.0.1:8000/process_resources/");
   if (!response.ok) {
     throw new Error("Failed to fetch process resources");
   }
@@ -66,10 +66,10 @@ export function useProcessInfo() {
   });
 }
 
-export function useProcessResource() {
+export function useProcessResources() {
   return useQuery({
-    queryKey: ["processResource"],
-    queryFn: fetchProcessResource,
+    queryKey: ["processResources"],
+    queryFn: fetchProcessResources,
     refetchInterval: 5000, // Poll every 5 seconds for real-time data
   });
 }

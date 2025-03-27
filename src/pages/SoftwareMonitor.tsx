@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -41,7 +40,6 @@ export default function SoftwareMonitor() {
     rawData
   } = usePaginatedSoftwareInfo(pageSize);
 
-  // Filter the full dataset based on search term
   const filteredSoftware = useMemo(() => {
     if (!rawData || !searchTerm.trim()) return rawData;
     
@@ -53,26 +51,21 @@ export default function SoftwareMonitor() {
     );
   }, [rawData, searchTerm]);
 
-  // Calculate pagination properties
   const totalResults = filteredSoftware?.length || 0;
   const totalPages = Math.ceil(totalResults / pageSize);
 
-  // Update filtered data when search term or page changes
   useEffect(() => {
     if (filteredSoftware) {
-      // Reset to first page when search term changes
       if (searchTerm.trim() && currentPage !== 1) {
         setCurrentPage(1);
       }
       
-      // Calculate page slice
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       setFilteredData(filteredSoftware.slice(startIndex, endIndex));
     }
   }, [filteredSoftware, currentPage, pageSize, searchTerm]);
 
-  // Page navigation functions
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
@@ -80,21 +73,9 @@ export default function SoftwareMonitor() {
   const nextPage = () => goToPage(currentPage + 1);
   const prevPage = () => goToPage(currentPage - 1);
 
-  // dummy data
-  // const getCategoryCounts = () => {
-  //   return [
-  //     { category: "Development", percentage: 35 },
-  //     { category: "Productivity", percentage: 25 },
-  //     { category: "Communication", percentage: 20 },
-  //     { category: "Media", percentage: 15 },
-  //     { category: "Other", percentage: 5 },
-  //   ];
-  // };
-
   const getCategoryCounts = () => {
     if (!rawData) return [];
   
-    // Count the number of software in each privilege category
     const privilegeCounts = rawData.reduce(
       (acc, app) => {
         if (app.sw_privilege === "root") acc.root++;
@@ -107,19 +88,14 @@ export default function SoftwareMonitor() {
   
     const total = privilegeCounts.root + privilegeCounts.user + privilegeCounts.unknown;
   
-    // Return the data with total counts and percentages
     return [
-      { category: "Root", count: privilegeCounts.root, percentage: ((privilegeCounts.root / total) * 100).toFixed(2) },
-      { category: "User", count: privilegeCounts.user, percentage: ((privilegeCounts.user / total) * 100).toFixed(2) },
-      { category: "Unknown", count: privilegeCounts.unknown, percentage: ((privilegeCounts.unknown / total) * 100).toFixed(2) },
+      { category: "Root", count: privilegeCounts.root, percentage: parseFloat(((privilegeCounts.root / total) * 100).toFixed(2)) },
+      { category: "User", count: privilegeCounts.user, percentage: parseFloat(((privilegeCounts.user / total) * 100).toFixed(2)) },
+      { category: "Unknown", count: privilegeCounts.unknown, percentage: parseFloat(((privilegeCounts.unknown / total) * 100).toFixed(2)) },
     ];
   };
   
   const categoryData = getCategoryCounts();
-
-  
-  // const categoryData = getCategoryCounts(); 
-    // console.log(softwareInfo)
 
   return (
     <div className="space-y-8">
@@ -321,13 +297,9 @@ export default function SoftwareMonitor() {
         <TabsContent value="updates" className="mt-6">
           <Card>
             <CardHeader>
-              {/* <CardTitle>Update History</CardTitle>
-              <CardDescription>
-                Software updates over the past 6 months
-              </CardDescription> */}
               Coming soon ..
             </CardHeader>
-            {/* <CardContent>
+            <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -354,45 +326,10 @@ export default function SoftwareMonitor() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent> */}
+            </CardContent>
           </Card>
         </TabsContent>
         
-        {/* <TabsContent value="categories" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Software Categories</CardTitle>
-              <CardDescription>
-                Breakdown of installed applications
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {categoryData.map((item, index) => (
-                  <div key={item.category} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className={`w-2 h-2 rounded-full ${
-                            index === 0 ? 'bg-blue-500' : 
-                            index === 1 ? 'bg-purple-500' : 
-                            index === 2 ? 'bg-green-500' : 
-                            index === 3 ? 'bg-yellow-500' : 
-                            'bg-red-500'
-                          }`} 
-                        />
-                        <p className="text-sm font-medium">{item.category}</p>
-                      </div>
-                      <span className="text-sm">{item.percentage}%</span>
-                    </div>
-                    <Progress value={item.percentage} className="h-2" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent> */}
-
         <TabsContent value="categories" className="mt-6">
           <Card>
             <CardHeader>

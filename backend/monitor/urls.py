@@ -20,5 +20,6 @@ urlpatterns = [
     # path('sse_file_activity/', sse_file_activity, name = 'file_activity'),
     path('sse_window_activity/', sse_window_activity, name = 'window_activity'),
     path('temp/', get_temperatures, name='temp'),
+    path('process_resources/', ProcessResourceListView.as_view(), name='process_resources'),
 ]
 

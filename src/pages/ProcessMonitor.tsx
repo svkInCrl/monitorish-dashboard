@@ -2,11 +2,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Activity, Circle, RefreshCw, X, Terminal } from "lucide-react";
+import { Activity, Circle, RefreshCw, X, Terminal, CpuIcon , Server} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProcessCount, useProcessInfo } from "@/hooks/useProcessData";
+import { useProcessCount, useProcessInfo, useProcessResource } from "@/hooks/useProcessData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useMetrics } from "@/hooks/useMetrics";
+import { useSystemDetails } from "@/hooks/useSystemDetails";
+import {MetricCard} from "@/components/system-monitor/MetricCard"; // Adjust the path as needed
 
 export default function ProcessMonitor() {
   const { toast } = useToast();
@@ -23,6 +26,20 @@ export default function ProcessMonitor() {
     isLoading: isLoadingProcesses,
     refetch: refetchProcesses 
   } = useProcessInfo();
+
+  const {
+    data : processResources,
+    isLoading: isLoadingResources,
+    refetch: refetchResources
+  } = useProcessResource();
+
+  const {data : metrics, isLoading: isLoadingMetrics} = useMetrics();
+
+  const { data: systemDetails, isLoading: isLoadingDetails } =
+      useSystemDetails();
+
+  const systemInfo =
+  systemDetails && systemDetails.length > 0 ? systemDetails[0] : null;
 
   const handleRefresh = async () => {
     setRefreshTrigger(prev => prev + 1);
@@ -85,30 +102,30 @@ export default function ProcessMonitor() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">CPU Load</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">45%</div>
-              <div className="text-xs text-muted-foreground">4 cores @ 3.2GHz</div>
-            </div>
-            <Progress value={45} className="h-2" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Memory Usage</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">3.8 GB</div>
-              <div className="text-xs text-muted-foreground">of 16 GB (24%)</div>
-            </div>
-            <Progress value={24} className="h-2" />
-          </CardContent>
-        </Card>
+        <MetricCard
+        title="CPU Usage"
+        value={metrics?.["cpu_usage"] ?? 0}
+        icon={CpuIcon}
+        progress={metrics?.['cpu_usage']}
+        subtitle={
+          systemDetails
+            ? `${systemInfo.cpu_count} Cores @ ${systemInfo.cpu_freq.toFixed(
+                2
+              )} MHz`
+            : "CPU"
+        }
+        loading={isLoadingMetrics}
+      />
+        <MetricCard
+        title="Memory Usage"
+        value={metrics?.["ram_usage"] ?? 0}
+        icon={Server}
+        progress={metrics?.["ram_usage"]}
+        subtitle={
+          systemDetails ? `${systemInfo.ram_size.toFixed(1)} GB RAM` : "Memory"
+        }
+        loading={isLoadingMetrics}
+      />
       </div>
 
       <Card>

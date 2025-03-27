@@ -80,17 +80,46 @@ export default function SoftwareMonitor() {
   const nextPage = () => goToPage(currentPage + 1);
   const prevPage = () => goToPage(currentPage - 1);
 
+  // dummy data
+  // const getCategoryCounts = () => {
+  //   return [
+  //     { category: "Development", percentage: 35 },
+  //     { category: "Productivity", percentage: 25 },
+  //     { category: "Communication", percentage: 20 },
+  //     { category: "Media", percentage: 15 },
+  //     { category: "Other", percentage: 5 },
+  //   ];
+  // };
+
   const getCategoryCounts = () => {
+    if (!rawData) return [];
+  
+    // Count the number of software in each privilege category
+    const privilegeCounts = rawData.reduce(
+      (acc, app) => {
+        if (app.sw_privilege === "root") acc.root++;
+        else if (app.sw_privilege.toLowerCase().includes("user")) acc.user++;
+        else acc.unknown++;
+        return acc;
+      },
+      { root: 0, user: 0, unknown: 0 }
+    );
+  
+    const total = privilegeCounts.root + privilegeCounts.user + privilegeCounts.unknown;
+  
+    // Return the data with total counts and percentages
     return [
-      { category: "Development", percentage: 35 },
-      { category: "Productivity", percentage: 25 },
-      { category: "Communication", percentage: 20 },
-      { category: "Media", percentage: 15 },
-      { category: "Other", percentage: 5 },
+      { category: "Root", count: privilegeCounts.root, percentage: ((privilegeCounts.root / total) * 100).toFixed(2) },
+      { category: "User", count: privilegeCounts.user, percentage: ((privilegeCounts.user / total) * 100).toFixed(2) },
+      { category: "Unknown", count: privilegeCounts.unknown, percentage: ((privilegeCounts.unknown / total) * 100).toFixed(2) },
     ];
   };
   
   const categoryData = getCategoryCounts();
+
+  
+  // const categoryData = getCategoryCounts(); 
+    // console.log(softwareInfo)
 
   return (
     <div className="space-y-8">
@@ -108,7 +137,7 @@ export default function SoftwareMonitor() {
             <Code className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{softwareInfo?.length || 0}</div>
+            <div className="text-2xl font-bold">{totalResults}</div>
             <p className="text-xs text-muted-foreground">
               Applications tracked
             </p>
@@ -120,9 +149,9 @@ export default function SoftwareMonitor() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">Coming soon ..</div>
             <p className="text-xs text-muted-foreground">
-              Security updates: 1
+              
             </p>
           </CardContent>
         </Card>
@@ -292,12 +321,13 @@ export default function SoftwareMonitor() {
         <TabsContent value="updates" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Update History</CardTitle>
+              {/* <CardTitle>Update History</CardTitle>
               <CardDescription>
                 Software updates over the past 6 months
-              </CardDescription>
+              </CardDescription> */}
+              Coming soon ..
             </CardHeader>
-            <CardContent>
+            {/* <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -324,11 +354,11 @@ export default function SoftwareMonitor() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent>
+            </CardContent> */}
           </Card>
         </TabsContent>
         
-        <TabsContent value="categories" className="mt-6">
+        {/* <TabsContent value="categories" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Software Categories</CardTitle>
@@ -352,6 +382,43 @@ export default function SoftwareMonitor() {
                           }`} 
                         />
                         <p className="text-sm font-medium">{item.category}</p>
+                      </div>
+                      <span className="text-sm">{item.percentage}%</span>
+                    </div>
+                    <Progress value={item.percentage} className="h-2" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent> */}
+
+        <TabsContent value="categories" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Software Categories</CardTitle>
+              <CardDescription>
+                Breakdown of installed applications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {categoryData.map((item, index) => (
+                  <div key={item.category} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className={`w-2 h-2 rounded-full ${
+                            index === 0 ? 'bg-blue-500' : 
+                            index === 1 ? 'bg-purple-500' : 
+                            index === 2 ? 'bg-green-500' : 
+                            index === 3 ? 'bg-yellow-500' : 
+                            'bg-red-500'
+                          }`} 
+                        />
+                        <p className="text-sm font-medium">
+                          {item.category} ({item.count})
+                        </p>
                       </div>
                       <span className="text-sm">{item.percentage}%</span>
                     </div>

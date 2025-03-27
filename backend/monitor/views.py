@@ -162,17 +162,7 @@ def get_system_monitor_data(request):
     return JsonResponse(datalist, safe=False)
 
 def process_count(request):
-    count = 0
-    for proc in psutil.process_iter(attrs=['name', 'username']):
-        try:
-            name = proc.info['name']
-            user = proc.info['username']
-            
-            if name not in IGNORED_PROCESSES and user not in IGNORED_USERS:
-                count += 1
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue  # Ignore processes that vanish or can't be accessed
-    
+    count = ProcessInfo.objects.count()
     return JsonResponse({"process_count": count})
 
 def get_timestamp():
@@ -428,6 +418,12 @@ def delete_file(request, hash):
         return Response({"message": "File deleted successfully"}, status=200)
     except CriticalFile.DoesNotExist:
         return Response({"error": "File not found"}, status=404)
+    
+def get_process_resources(request):
+    """Fetch process resource usage."""
+    records = ProcessResources.objects.all().order_by('-timestamp')
+    serializer = ProcessResourcesSerializer(records, many=True)
+    return Response(serializer.data)
 
 # @api_view(['GET'])
 # def get_live_data(request):

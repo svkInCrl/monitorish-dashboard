@@ -50,22 +50,21 @@ const fetchProcessResources = async (): Promise<ProcessResource[]> => {
   return response.json();
 };
 
-const killProcessById = async (pid: number): Promise<{ success: boolean, message: string }> => {
-  // In a real app, this would make an API call to the backend to kill the process
-  // For now, we'll just simulate the process with a delay
-  console.log(`Attempting to kill process with PID: ${pid}`);
-  
-  return new Promise((resolve, reject) => {
-    // Simulate API call delay
-    setTimeout(() => {
-      // Simulate a 90% success rate
-      if (Math.random() > 0.1) {
-        resolve({ success: true, message: `Process ${pid} terminated successfully` });
-      } else {
-        reject(new Error(`Failed to terminate process ${pid}`));
-      }
-    }, 1500);
+const killProcessById = async (pid: number): Promise<{ message: string }> => {
+  const response = await fetch("http://127.0.0.1:8000/kill_process/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pid }),
   });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to terminate process");
+  }
+  
+  return response.json();
 };
 
 export function useProcessCount() {

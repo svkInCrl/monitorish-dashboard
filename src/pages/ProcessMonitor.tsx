@@ -19,6 +19,7 @@ export default function ProcessMonitor() {
   const [processToKill, setProcessToKill] = useState<{ pid: number; name: string } | null>(null);
   const [killStatus, setKillStatus] = useState<'idle' | 'killing' | 'killed' | 'error'>('idle');
   const [showKillDialog, setShowKillDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const { 
     data: processCount, 
@@ -38,7 +39,7 @@ export default function ProcessMonitor() {
     refetch: refetchResources
   } = useProcessResources();
 
-  const { mutateAsync: killProcess } = useKillProcess();
+  const { mutateAsync: killProcess, isPending: isKillingProcess } = useKillProcess();
 
   const { data: metrics, isLoading: isLoadingMetrics } = useMetrics();
 
@@ -76,6 +77,8 @@ export default function ProcessMonitor() {
   const confirmKillProcess = (pid: number, name: string) => {
     setProcessToKill({ pid, name });
     setShowKillDialog(true);
+    setKillStatus('idle');
+    setErrorMessage(null);
   };
 
   const handleEndProcess = async () => {
@@ -85,11 +88,11 @@ export default function ProcessMonitor() {
     setKillStatus('killing');
     
     try {
-      await killProcess(pid);
+      const result = await killProcess(pid);
       setKillStatus('killed');
       toast({
         title: "Process Terminated",
-        description: `Process ${name} (${pid}) has been terminated`,
+        description: result.message || `Process ${name} (${pid}) has been terminated`,
       });
       
       // Refresh process list after killing
@@ -102,10 +105,12 @@ export default function ProcessMonitor() {
       
     } catch (error) {
       setKillStatus('error');
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+      setErrorMessage(errorMsg);
       toast({
         variant: "destructive",
         title: "Error",
-        description: `Failed to terminate process ${name} (${pid})`,
+        description: errorMsg,
       });
     }
   };
@@ -114,6 +119,7 @@ export default function ProcessMonitor() {
     setShowKillDialog(false);
     setKillStatus('idle');
     setProcessToKill(null);
+    setErrorMessage(null);
   };
 
   return (
@@ -307,7 +313,7 @@ export default function ProcessMonitor() {
                       )}
                       {killStatus === 'error' && (
                         <span className="text-red-500 flex items-center gap-1">
-                          <X className="h-4 w-4" /> Failed to terminate
+                          <X className="h-4 w-4" /> Failed to terminate: {errorMessage}
                         </span>
                       )}
                     </div>
@@ -325,6 +331,12 @@ export default function ProcessMonitor() {
             )}
             {(killStatus === 'killed' || killStatus === 'error') && (
               <Button onClick={closeKillDialog}>Close</Button>
+            )}
+            {killStatus === 'killing' && (
+              <Button disabled>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Terminating...
+              </Button>
             )}
           </DialogFooter>
         </DialogContent>

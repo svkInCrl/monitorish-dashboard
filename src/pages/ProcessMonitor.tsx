@@ -4,16 +4,21 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Activity, Circle, RefreshCw, X, Terminal, CpuIcon, Server, MemoryStickIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProcessCount, useProcessInfo, useProcessResources } from "@/hooks/useProcessData";
+import { useProcessCount, useProcessInfo, useProcessResources, useKillProcess } from "@/hooks/useProcessData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useSystemDetails } from "@/hooks/useSystemDetails";
 import { MetricCard } from "@/components/system-monitor/MetricCard";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default function ProcessMonitor() {
   const { toast } = useToast();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [processToKill, setProcessToKill] = useState<{ pid: number; name: string } | null>(null);
+  const [killStatus, setKillStatus] = useState<'idle' | 'killing' | 'killed' | 'error'>('idle');
+  const [showKillDialog, setShowKillDialog] = useState(false);
   
   const { 
     data: processCount, 
@@ -32,6 +37,8 @@ export default function ProcessMonitor() {
     isLoading: isLoadingResources,
     refetch: refetchResources
   } = useProcessResources();
+
+  const { mutateAsync: killProcess } = useKillProcess();
 
   const { data: metrics, isLoading: isLoadingMetrics } = useMetrics();
 
@@ -66,11 +73,47 @@ export default function ProcessMonitor() {
     };
   };
 
-  const handleEndProcess = (pid: number, name: string) => {
-    // This would connect to an API endpoint to end the process
-    toast({
-      description: `Request to end process ${name} (${pid}) sent`,
-    });
+  const confirmKillProcess = (pid: number, name: string) => {
+    setProcessToKill({ pid, name });
+    setShowKillDialog(true);
+  };
+
+  const handleEndProcess = async () => {
+    if (!processToKill) return;
+    
+    const { pid, name } = processToKill;
+    setKillStatus('killing');
+    
+    try {
+      await killProcess(pid);
+      setKillStatus('killed');
+      toast({
+        title: "Process Terminated",
+        description: `Process ${name} (${pid}) has been terminated`,
+      });
+      
+      // Refresh process list after killing
+      setTimeout(async () => {
+        await handleRefresh();
+        setShowKillDialog(false);
+        setKillStatus('idle');
+        setProcessToKill(null);
+      }, 1000);
+      
+    } catch (error) {
+      setKillStatus('error');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to terminate process ${name} (${pid})`,
+      });
+    }
+  };
+
+  const closeKillDialog = () => {
+    setShowKillDialog(false);
+    setKillStatus('idle');
+    setProcessToKill(null);
   };
 
   return (
@@ -192,15 +235,34 @@ export default function ProcessMonitor() {
                           Running
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => handleEndProcess(process.pid, process.process_name)}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">End process</span>
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8"
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">End process</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Kill Process</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to terminate the process <span className="font-semibold">{process.process_name}</span> (PID: {process.pid})? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => confirmKillProcess(process.pid, process.process_name)}
+                                >
+                                  Kill Process
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </TableCell>
                       </TableRow>
                     );
@@ -211,6 +273,62 @@ export default function ProcessMonitor() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Process Kill Status Dialog */}
+      <Dialog open={showKillDialog} onOpenChange={closeKillDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {killStatus === 'killing' ? 'Terminating Process...' : 
+               killStatus === 'killed' ? 'Process Terminated' : 
+               killStatus === 'error' ? 'Error' : 'Process Status'}
+            </DialogTitle>
+            <DialogDescription>
+              {processToKill && (
+                <div className="py-4">
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <span className="font-semibold">Process:</span> {processToKill.name}
+                    </div>
+                    <div>
+                      <span className="font-semibold">PID:</span> {processToKill.pid}
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-semibold">Status:</span>{" "}
+                      {killStatus === 'killing' && (
+                        <span className="text-yellow-500 flex items-center gap-1">
+                          <RefreshCw className="h-4 w-4 animate-spin" /> Terminating...
+                        </span>
+                      )}
+                      {killStatus === 'killed' && (
+                        <span className="text-green-500 flex items-center gap-1">
+                          <Circle className="h-4 w-4 fill-green-500" /> Terminated
+                        </span>
+                      )}
+                      {killStatus === 'error' && (
+                        <span className="text-red-500 flex items-center gap-1">
+                          <X className="h-4 w-4" /> Failed to terminate
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            {killStatus === 'idle' && (
+              <>
+                <Button variant="outline" onClick={closeKillDialog}>Cancel</Button>
+                <Button onClick={handleEndProcess}>Terminate</Button>
+              </>
+            )}
+            {(killStatus === 'killed' || killStatus === 'error') && (
+              <Button onClick={closeKillDialog}>Close</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

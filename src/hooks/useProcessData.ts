@@ -1,5 +1,5 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 export interface Process {
   process_name: string;
@@ -50,6 +50,24 @@ const fetchProcessResources = async (): Promise<ProcessResource[]> => {
   return response.json();
 };
 
+const killProcessById = async (pid: number): Promise<{ success: boolean, message: string }> => {
+  // In a real app, this would make an API call to the backend to kill the process
+  // For now, we'll just simulate the process with a delay
+  console.log(`Attempting to kill process with PID: ${pid}`);
+  
+  return new Promise((resolve, reject) => {
+    // Simulate API call delay
+    setTimeout(() => {
+      // Simulate a 90% success rate
+      if (Math.random() > 0.1) {
+        resolve({ success: true, message: `Process ${pid} terminated successfully` });
+      } else {
+        reject(new Error(`Failed to terminate process ${pid}`));
+      }
+    }, 1500);
+  });
+};
+
 export function useProcessCount() {
   return useQuery({
     queryKey: ["processCount"],
@@ -71,5 +89,11 @@ export function useProcessResources() {
     queryKey: ["processResources"],
     queryFn: fetchProcessResources,
     refetchInterval: 5000, // Poll every 5 seconds for real-time data
+  });
+}
+
+export function useKillProcess() {
+  return useMutation({
+    mutationFn: killProcessById,
   });
 }

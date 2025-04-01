@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Activity, Circle, RefreshCw, X, Terminal, CpuIcon, Server, MemoryStickIcon } from "lucide-react";
+import { Activity, Circle, RefreshCw, X, Terminal, CpuIcon, Server, MemoryStickIcon, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProcessCount, useProcessInfo, useProcessResources, useKillProcess } from "@/hooks/useProcessData";
 import { useState } from "react";
@@ -13,6 +12,9 @@ import { MetricCard } from "@/components/system-monitor/MetricCard";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
+type SortColumn = 'cpu' | 'ram' | null;
+type SortDirection = 'asc' | 'desc';
+
 export default function ProcessMonitor() {
   const { toast } = useToast();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -20,6 +22,9 @@ export default function ProcessMonitor() {
   const [killStatus, setKillStatus] = useState<'idle' | 'killing' | 'killed' | 'error'>('idle');
   const [showKillDialog, setShowKillDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  const [sortColumn, setSortColumn] = useState<SortColumn>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   
   const { 
     data: processCount, 
@@ -64,7 +69,6 @@ export default function ProcessMonitor() {
     }
   };
 
-  // Function to find CPU and RAM usage by PID
   const getResourceUsage = (pid: number) => {
     if (!processResources) return { cpu: null, ram: null };
     const resource = processResources.find(res => res.pid === pid);
@@ -95,7 +99,6 @@ export default function ProcessMonitor() {
         description: result.message || `Process ${name} (${pid}) has been terminated`,
       });
       
-      // Refresh process list after killing
       setTimeout(async () => {
         await handleRefresh();
         setShowKillDialog(false);
@@ -121,6 +124,38 @@ export default function ProcessMonitor() {
     setProcessToKill(null);
     setErrorMessage(null);
   };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('desc');
+    }
+  };
+
+  const getSortedProcesses = () => {
+    if (!processes || !sortColumn) return processes;
+
+    return [...processes].sort((a, b) => {
+      const resourceA = getResourceUsage(a.pid);
+      const resourceB = getResourceUsage(b.pid);
+      
+      const valueA = sortColumn === 'cpu' 
+        ? (resourceA.cpu ?? 0) 
+        : (resourceA.ram ?? 0) * 100;
+      
+      const valueB = sortColumn === 'cpu' 
+        ? (resourceB.cpu ?? 0) 
+        : (resourceB.ram ?? 0) * 100;
+      
+      return sortDirection === 'asc' 
+        ? valueA - valueB 
+        : valueB - valueA;
+    });
+  };
+
+  const sortedProcesses = getSortedProcesses();
 
   return (
     <div className="space-y-8">
@@ -209,14 +244,46 @@ export default function ProcessMonitor() {
                     <TableHead>Path</TableHead>
                     <TableHead className="text-right">PPID</TableHead>
                     <TableHead className="text-right">Connections</TableHead>
-                    <TableHead className="text-right">CPU (%)</TableHead>
-                    <TableHead className="text-right">RAM (%)</TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer"
+                      onClick={() => handleSort('cpu')}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        CPU (%)
+                        {sortColumn === 'cpu' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="h-4 w-4" />
+                          ) : (
+                            <ArrowDown className="h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer"
+                      onClick={() => handleSort('ram')}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        RAM (%)
+                        {sortColumn === 'ram' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="h-4 w-4" />
+                          ) : (
+                            <ArrowDown className="h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {processes && processes.map((process) => {
+                  {sortedProcesses && sortedProcesses.map((process) => {
                     const resources = getResourceUsage(process.pid);
                     return (
                       <TableRow key={process.pid}>
@@ -280,7 +347,6 @@ export default function ProcessMonitor() {
         </CardContent>
       </Card>
       
-      {/* Process Kill Status Dialog */}
       <Dialog open={showKillDialog} onOpenChange={closeKillDialog}>
         <DialogContent>
           <DialogHeader>

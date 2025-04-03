@@ -1,9 +1,9 @@
 {
     "database": {
       "host": "localhost",
-      "user": "root",
-      "password": "Crl@123",
-      "database": "Threat_Erase_DB"
+      "user": "admin",
+      "password": "password",
+      "database": "th_db"
     },
     "excluded_processes": [
       "gnome-shell",
@@ -26,7 +26,7 @@
     "aggregation_interval": 10,
     "log_file": "activity.log",
     "file_monitor_paths": [
-      "/home/suraj-mishra",
+      "/home/",
       "/var/log"
     ]
   }

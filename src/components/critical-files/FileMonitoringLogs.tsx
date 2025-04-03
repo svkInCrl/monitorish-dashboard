@@ -1,19 +1,18 @@
-
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-import { FileText, Edit, Trash2 } from "lucide-react";
+import { FileText, Edit, Trash2, FilePlus, Move } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileActivityLog {
   id: string;
   file_path: string;
   file_name: string;
   timestamp: string;
-  action: "opened" | "modified" | "deleted";
+  action: "created" | "modified" | "deleted" | "moved";
   user: string;
+  destination?: string;
 }
 
 export function FileMonitoringLogs() {
@@ -21,33 +20,24 @@ export function FileMonitoringLogs() {
   const [fileActivities, setFileActivities] = useState<FileActivityLog[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Simulate some initial data
-  const initialLogs: FileActivityLog[] = [
-    {
-      id: "1",
-      file_path: "/etc/passwd",
-      file_name: "passwd",
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      action: "opened",
-      user: "root"
-    },
-    {
-      id: "2",
-      file_path: "/etc/shadow",
-      file_name: "shadow",
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
-      action: "modified",
-      user: "system"
+  const fetchInitialData = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/user_activity_events/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch initial data");
+      }
+      const data: FileActivityLog[] = await response.json();
+      setFileActivities(data);
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
     }
-  ];
-
+  };
+  
   useEffect(() => {
-    // Set initial logs
-    setFileActivities(initialLogs);
-
-    // Connect to SSE endpoint for real-time file activity updates
-    const eventSource = new EventSource("http://127.0.0.1:8000/sse_file_activity/");
+    fetchInitialData();
     
+    const eventSource = new EventSource("http://127.0.0.1:8000/sse_file_activity/");
+
     eventSource.onopen = () => {
       console.log("Connected to file activity stream");
       setIsConnected(true);
@@ -56,46 +46,51 @@ export function FileMonitoringLogs() {
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
-        if (data.message) {
-          const message = data.message;
-          let action: "opened" | "modified" | "deleted" = "opened";
-          let filePath = "";
-          let fileName = "";
-          
-          if (message.includes("opened")) {
-            action = "opened";
-            filePath = message.replace(" was opened", "").trim();
-          } else if (message.includes("modified")) {
-            action = "modified";
-            filePath = message.replace(" was modified", "").trim();
-          } else if (message.includes("deleted")) {
-            action = "deleted";
-            filePath = message.replace(" was deleted", "").trim();
-          }
-          
-          fileName = filePath.split("/").pop() || filePath;
-          
-          if (filePath) {
-            const newActivity: FileActivityLog = {
-              id: Date.now().toString(),
-              file_path: filePath,
-              file_name: fileName,
-              timestamp: new Date().toISOString(),
-              action: action,
-              user: "system" // In a real app, you'd get the actual user
-            };
-            
-            setFileActivities(prev => [newActivity, ...prev]);
-            
-            // Show toast notification for critical file activities
-            toast({
-              title: `File ${action}`,
-              description: `${fileName} was ${action} by ${newActivity.user}`,
-              variant: action === "deleted" ? "destructive" : "default",
-            });
-          }
+        const { event_type, message, timestamp } = data;
+
+        let action: "created" | "modified" | "deleted" | "moved" = "created";
+        let filePath = "";
+        let destination = "";
+        let user = "Unknown";
+
+        if (message.includes("File created:")) {
+          action = "created";
+          filePath = message.split("File created:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File deleted:")) {
+          action = "deleted";
+          filePath = message.split("File deleted:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File modified:")) {
+          action = "modified";
+          filePath = message.split("File modified:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File moved from")) {
+          action = "moved";
+          filePath = message.split("File moved from")[1].split(" to ")[0].trim();
+          destination = message.split(" to ")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
         }
+
+        const fileName = filePath.split("/").pop() || filePath;
+
+        const newActivity: FileActivityLog = {
+          id: crypto.randomUUID(),
+          file_path: filePath,
+          file_name: fileName,
+          timestamp: timestamp,
+          action: action,
+          user: user,
+          destination: action === "moved" ? destination : undefined,
+        };
+
+        setFileActivities((prev) => [newActivity, ...prev]);
+
+        toast({
+          title: `File ${action}`,
+          description: `${fileName} was ${action} by ${user}`,
+          variant: action === "deleted" ? "destructive" : "default",
+        });
       } catch (err) {
         console.error("Error parsing file activity SSE data:", err);
       }
@@ -104,11 +99,8 @@ export function FileMonitoringLogs() {
     eventSource.onerror = () => {
       console.error("Connection to file activity stream failed");
       setIsConnected(false);
-      
-      // Try to reconnect after a delay
-      setTimeout(() => {
-        eventSource.close();
-      }, 5000);
+      eventSource.close();
+      setTimeout(() => new EventSource("http://127.0.0.1:8000/sse_file_activity/"), 5000);
     };
 
     return () => {
@@ -116,31 +108,18 @@ export function FileMonitoringLogs() {
     };
   }, [toast]);
 
-  // Function to get appropriate icon based on action
   const getActionIcon = (action: string) => {
     switch (action) {
-      case "opened":
-        return <FileText className="h-4 w-4 text-blue-500" />;
+      case "created":
+        return <FilePlus className="h-4 w-4 text-green-500" />;
       case "modified":
         return <Edit className="h-4 w-4 text-amber-500" />;
       case "deleted":
         return <Trash2 className="h-4 w-4 text-red-500" />;
+      case "moved":
+        return <Move className="h-4 w-4 text-purple-500" />;
       default:
         return <FileText className="h-4 w-4" />;
-    }
-  };
-
-  // Function to get appropriate badge color based on action
-  const getActionBadgeVariant = (action: string) => {
-    switch (action) {
-      case "opened":
-        return "outline";
-      case "modified":
-        return "warning";
-      case "deleted":
-        return "destructive";
-      default:
-        return "outline";
     }
   };
 
@@ -174,15 +153,13 @@ export function FileMonitoringLogs() {
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         {getActionIcon(activity.action)}
-                        <Badge variant={getActionBadgeVariant(activity.action) as any}>
-                          {activity.action}
-                        </Badge>
+                        <Badge variant="outline">{activity.action}</Badge>
                       </div>
                     </TableCell>
                     <TableCell>{activity.file_name}</TableCell>
                     <TableCell className="font-mono text-xs">{activity.file_path}</TableCell>
                     <TableCell>{activity.user}</TableCell>
-                    <TableCell>{new Date(activity.timestamp).toLocaleString()}</TableCell>
+                    <TableCell>{activity.timestamp}</TableCell>
                   </TableRow>
                 ))
               )}
@@ -193,83 +170,3 @@ export function FileMonitoringLogs() {
     </Card>
   );
 }
-
-// Export data for use in other components
-export const useFileActivityData = () => {
-  const [fileActivities, setFileActivities] = useState<FileActivityLog[]>([]);
-  
-  useEffect(() => {
-    // Simulate initial data to match the FileMonitoringLogs component
-    const initialLogs: FileActivityLog[] = [
-      {
-        id: "1",
-        file_path: "/etc/passwd",
-        file_name: "passwd",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        action: "opened",
-        user: "root"
-      },
-      {
-        id: "2",
-        file_path: "/etc/shadow",
-        file_name: "shadow",
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        action: "modified",
-        user: "system"
-      }
-    ];
-    
-    setFileActivities(initialLogs);
-    
-    // Listen for SSE events
-    const eventSource = new EventSource("http://127.0.0.1:8000/sse_file_activity/");
-    
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        if (data.message) {
-          const message = data.message;
-          let action: "opened" | "modified" | "deleted" = "opened";
-          let filePath = "";
-          
-          if (message.includes("opened")) {
-            action = "opened";
-            filePath = message.replace(" was opened", "").trim();
-          } else if (message.includes("modified")) {
-            action = "modified";
-            filePath = message.replace(" was modified", "").trim();
-          } else if (message.includes("deleted")) {
-            action = "deleted";
-            filePath = message.replace(" was deleted", "").trim();
-          }
-          
-          const fileName = filePath.split("/").pop() || filePath;
-          
-          if (filePath) {
-            const newActivity: FileActivityLog = {
-              id: Date.now().toString(),
-              file_path: filePath,
-              file_name: fileName,
-              timestamp: new Date().toISOString(),
-              action: action,
-              user: "system"
-            };
-            
-            setFileActivities(prev => [newActivity, ...prev]);
-          }
-        }
-      } catch (err) {
-        console.error("Error parsing file activity SSE data:", err);
-      }
-    };
-    
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-  
-  return fileActivities;
-};
-
-export type { FileActivityLog };

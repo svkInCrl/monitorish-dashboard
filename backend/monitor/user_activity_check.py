@@ -131,7 +131,7 @@ class ActivityMonitor(threading.Thread):
                         if self.process_count[app_name] == 0 and app_name not in self.excluded_processes and not self.should_ignore_process(app_name):  # Exclude specific processes
                             self.process_count[app_name] = 1
                             self.print_app_activity(f"{app_name} started")
-                            self.process_activity.emit(f"{app_name} started")
+                            # self.process_activity.emit(f"{app_name} started")
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
 
@@ -144,7 +144,7 @@ class ActivityMonitor(threading.Thread):
                         if self.process_count[app_name] == 1 and app_name not in self.excluded_processes and not self.should_ignore_process(app_name):  # Exclude specific processes
                             self.process_count[app_name] = 0
                             self.print_app_activity(f"{app_name} closed")
-                            self.process_activity.emit(f"{app_name} closed")
+                            # self.process_activity.emit(f"{app_name} closed")
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
 
@@ -206,7 +206,7 @@ class ActivityMonitor(threading.Thread):
     
         if process_name == 'System':
             message = f"Created {"folder" if event.is_directory else "file"}: {os.path.basename(file_path)} by {process_name} at {file_path}"
-            self.file_activity.emit(message)
+            # self.file_activity.emit(message)
             self._aggregate_message('file_activity', message)
 
     def on_deleted(self, event):
@@ -217,7 +217,7 @@ class ActivityMonitor(threading.Thread):
         
         if process_name == 'System':
             message = f"Deleted {"folder" if event.is_directory else "file"}: {os.path.basename(file_path)} by {process_name} at {file_path}"
-            self.file_activity.emit(message)
+            # self.file_activity.emit(message)
             self._aggregate_message('file_activity', message)
 
     def on_modified(self, event):
@@ -230,7 +230,7 @@ class ActivityMonitor(threading.Thread):
         
         if process_name == 'System':
             message = f"Modified {"folder" if event.is_directory else "file"}: {os.path.basename(file_path)} by {process_name} at {file_path}"
-            self.file_activity.emit(message)
+            # self.file_activity.emit(message)
             self._aggregate_message('file_activity', message)
             
     def on_moved(self, event):
@@ -243,7 +243,7 @@ class ActivityMonitor(threading.Thread):
         
         if process_name == 'System':
             message = f"Moved/Renamed {"folder" if event.is_directory else "file"} : {os.path.basename(file_path)} by {process_name} at {file_path}"
-            self.file_activity.emit(message)
+            # self.file_activity.emit(message)
             self._aggregate_message('file_activity', message)
 
     def _aggregate_message(self, log_type, message):
@@ -297,11 +297,11 @@ class ActivityMonitor(threading.Thread):
             current_window = self.get_active_window_title()
             if not last_window:
                 print(f"Active window: {current_window}")  # Initial window
-                self.window_activity.emit(f"Active window: {current_window}")
+                # self.window_activity.emit(f"Active window: {current_window}")
                 last_window = current_window
             elif current_window and current_window != last_window:
                 print(f"Switched to: {current_window}")  # Window switched
-                self.window_activity.emit(f"Switched to: {current_window}")
+                # self.window_activity.emit(f"Switched to: {current_window}")
                 last_window = current_window
             time.sleep(1)  # Adjust the polling interval if needed
 

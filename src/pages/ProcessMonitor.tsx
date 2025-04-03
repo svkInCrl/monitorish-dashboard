@@ -22,7 +22,6 @@ export default function ProcessMonitor() {
   const [killStatus, setKillStatus] = useState<'idle' | 'killing' | 'killed' | 'error'>('idle');
   const [showKillDialog, setShowKillDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   
@@ -240,10 +239,6 @@ export default function ProcessMonitor() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Process</TableHead>
-                    <TableHead className="text-right">PID</TableHead>
-                    <TableHead>Path</TableHead>
-                    <TableHead className="text-right">PPID</TableHead>
-                    <TableHead className="text-right">Connections</TableHead>
                     <TableHead 
                       className="text-right cursor-pointer"
                       onClick={() => handleSort('cpu')}
@@ -278,6 +273,10 @@ export default function ProcessMonitor() {
                         )}
                       </div>
                     </TableHead>
+                    <TableHead className="text-right">PID</TableHead>
+                    <TableHead>Path</TableHead>
+                    <TableHead className="text-right">PPID</TableHead>
+                    <TableHead className="text-right">Connections</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -291,18 +290,18 @@ export default function ProcessMonitor() {
                           <Terminal className="h-4 w-4 text-muted-foreground" />
                           {process.process_name}
                         </TableCell>
-                        <TableCell className="text-right">{process.pid}</TableCell>
-                        <TableCell className="max-w-[200px] truncate" title={process.path}>
-                          {process.path}
-                        </TableCell>
-                        <TableCell className="text-right">{process.ppid}</TableCell>
-                        <TableCell className="text-right">{process.active_connections}</TableCell>
                         <TableCell className="text-right">
                           {resources.cpu !== null ? resources.cpu.toFixed(1) : 'N/A'}
                         </TableCell>
                         <TableCell className="text-right">
                           {resources.ram !== null ? (resources.ram * 100).toFixed(2) : 'N/A'}
                         </TableCell>
+                        <TableCell className="text-right">{process.pid}</TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={process.path}>
+                          {process.path}
+                        </TableCell>
+                        <TableCell className="text-right">{process.ppid}</TableCell>
+                        <TableCell className="text-right">{process.active_connections}</TableCell>
                         <TableCell className="flex items-center gap-2">
                           <Circle className="h-3 w-3 fill-green-500 text-green-500" />
                           Running

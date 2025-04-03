@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
-from .models import SystemMonitor, SystemDetails, ProcessInfo, InstalledSoftware, InitialHardwareConfig, HardwareChangeTracking, ProcessResources, CriticalFile
-from .serializers import SystemDetailsSerializer, ProcessInfoSerializer, ProcessResourcesSerializer, SystemMonitorSerializer, SoftwareMonitorSerializer, InitialHardwareConfigSerializer, HardwareChangeTrackingSerializer, CriticalFileSerializer
+from .models import UserActivity, SystemMonitor, SystemDetails, ProcessInfo, InstalledSoftware, InitialHardwareConfig, HardwareChangeTracking, ProcessResources, CriticalFile
+from .serializers import UserActivitySerializer, SystemDetailsSerializer, ProcessInfoSerializer, ProcessResourcesSerializer, SystemMonitorSerializer, SoftwareMonitorSerializer, InitialHardwareConfigSerializer, HardwareChangeTrackingSerializer, CriticalFileSerializer
 import psutil
 import subprocess
 import os
@@ -197,149 +197,139 @@ def sse_stream_hardware(request):
     response['Cache-Control'] = 'no-cache'
     return response
 
-# disp = display.Display()
-# root = disp.screen().root
-
-# def event_stream(queue):
-#     """Generator function to stream events from the queue."""
-#     while True:
-#         event = queue.get()
-#         if event is None:
-#             break  # Stop streaming if None is received
-#         yield f"data: {json.dumps(event)}\n\n"
-        
-def should_ignore_process(proc_name):
-        process_name = proc_name.lower()
-
-        # Ignore known system background processes
-        if process_name in ignored_processes:
-            return True
-
-        # Ignore kernel worker threads (e.g., "kworker/14:1-rcu_par_gp")
-        if process_name.startswith("kworker/"):
-            return True 
-
-        return False
-        
 # @csrf_exempt
 # @require_GET
-def sse_process_activity(request):
-    """SSE endpoint for process activity."""
-    # def get_processes():
-    #     """Returns a set of (pid, name) tuples for running processes."""
-    #     return {(p.pid, p.info['name']) for p in psutil.process_iter(['pid', 'name'])}
+# def sse_process_activity(request):
+#     """SSE endpoint for process activity."""
+#     # def get_processes():
+#     #     """Returns a set of (pid, name) tuples for running processes."""
+#     #     return {(p.pid, p.info['name']) for p in psutil.process_iter(['pid', 'name'])}
     
-    def event_stream():
-        previous_processes = set(psutil.process_iter(['pid', 'name']))
-        process_count = defaultdict(int)
-        while True:
-            try:
-                # Get current running processes
-                current_processes = set(psutil.process_iter(['pid', 'name']))
+#     def event_stream():
+#         previous_processes = set(psutil.process_iter(['pid', 'name']))
+#         process_count = defaultdict(int)
+#         while True:
+#             try:
+#                 # Get current running processes
+#                 current_processes = set(psutil.process_iter(['pid', 'name']))
 
-                # Check for newly started applications
-                new_processes = current_processes - previous_processes
-                for process in new_processes:
-                    try:
-                        app_name = process.info['name']
-                        app_pid = process.info['pid']
-                        if process_count[app_name] == 0 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
-                            process_count[app_name] = 1
-                            print(f"{app_name} started")
-                            # process_activity.emit(f"{app_name} started")
-                            yield f"data: {json.dumps({'message': f'{app_name} started'})}\n\n"
+#                 # Check for newly started applications
+#                 new_processes = current_processes - previous_processes
+#                 for process in new_processes:
+#                     try:
+#                         app_name = process.info['name']
+#                         app_pid = process.info['pid']
+#                         if process_count[app_name] == 0 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
+#                             process_count[app_name] = 1
+#                             print(f"{app_name} started")
+#                             # process_activity.emit(f"{app_name} started")
+#                             yield f"data: {json.dumps({'message': f'{app_name} started'})}\n\n"
                             
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        pass
+#                     except (psutil.NoSuchProcess, psutil.AccessDenied):
+#                         pass
 
-                # Check for closed applications
-                terminated_processes = previous_processes - current_processes
-                for process in terminated_processes:
-                    try:
-                        app_pid = process.info['pid']
-                        app_name = process.info['name']
-                        if process_count[app_name] == 1 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
-                            process_count[app_name] = 0
-                            print(f"{app_name} closed")
-                            # process_activity.emit(f"{app_name} closed")
-                            yield(f"data: {json.dumps({'message': f'{app_name} closed'})}\n\n")
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        pass
+#                 # Check for closed applications
+#                 terminated_processes = previous_processes - current_processes
+#                 for process in terminated_processes:
+#                     try:
+#                         app_pid = process.info['pid']
+#                         app_name = process.info['name']
+#                         if process_count[app_name] == 1 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
+#                             process_count[app_name] = 0
+#                             print(f"{app_name} closed")
+#                             # process_activity.emit(f"{app_name} closed")
+#                             yield(f"data: {json.dumps({'message': f'{app_name} closed'})}\n\n")
+#                     except (psutil.NoSuchProcess, psutil.AccessDenied):
+#                         pass
 
-                # Update previous processes
-                previous_processes = current_processes
-                time.sleep(1)
-            except Exception as e:
-                print(f"Error monitoring applications: {str(e)}")
+#                 # Update previous processes
+#                 previous_processes = current_processes
+#                 time.sleep(1)
+#             except Exception as e:
+#                 print(f"Error monitoring applications: {str(e)}")
     
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    # response['Connection'] = 'keep-alive'
-    # print(response)
-    return response
+#     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+#     response['Cache-Control'] = 'no-cache'
+#     # response['Connection'] = 'keep-alive'
+#     # print(response)
+#     return response
 
 # @csrf_exempt
 # @require_GET
 def sse_file_activity(request):
     """SSE endpoint for file activity."""
-    monitor = ActivityMonitor()
-    
-    def handle_file_activity(message):
-        file_queue.put({'type': 'file', 'message': message})
-        
-    monitor.file_activity.connect(handle_file_activity)
-    monitor.start()
-        
-    response = StreamingHttpResponse(event_stream(file_queue), content_type='text/event-stream')
+    def event_stream():
+        last_timestamp = UserActivity.objects.latest('timestamp').timestamp if UserActivity.objects.exists() else None
+        """Stream window activity events."""
+        while True:
+            try:
+                if last_timestamp:
+                    new_events = UserActivity.objects.filter(timestamp__gt=last_timestamp, event_type__in=['created', 'deleted', 'modified', 'moved']).order_by('timestamp')
+                else:
+                    new_events = UserActivity.objects.filter(event_type__in=['created', 'deleted', 'modified', 'moved']).order_by('timestamp')
+
+                for event in new_events:
+                    data = {
+                        "timestamp": event.timestamp.strftime('%d-%m-%Y %H:%M:%S'),
+                        "event_type": event.event_type,
+                        "message": event.message,
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    print(json.dumps(data))
+                    last_timestamp = event.timestamp
+
+
+
+                time.sleep(1)  # Poll the database every 1 second
+            except Exception as e:
+                print(f"Error streaming window activity: {str(e)}")
+
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
-    response['Connection'] = 'keep-alive'
     return response
 
-def get_active_window_title():
-        """Fetch the title of the currently active window"""
-        try:
-            disp = display.Display()  # Reinitialize display
-            root = disp.screen().root
-            
-            window_id = root.get_full_property(disp.intern_atom('_NET_ACTIVE_WINDOW'), X.AnyPropertyType)
-            
-            if not window_id or not window_id.value:
-                return None  # No active window detected
-            
-            window = disp.create_resource_object('window', window_id.value[0])
-            title = window.get_full_property(disp.intern_atom('_NET_WM_NAME'), 0)
-
-            if title and title.value:
-                return title.value.decode('utf-8')
-        except Xlib.error.BadWindow:
-            return None  # Ignore BadWindow errors
-        except Exception as e:
-            print(f"Error getting active window title: {e}")
-            return None
-
-        return None
+@api_view(['GET'])
+def get_user_activity_events(request):
+    """Fetch all UserActivity entries with specific event types."""
+    event_types = ['created', 'deleted', 'modified', 'moved']
+    events = UserActivity.objects.filter(event_type__in=event_types).order_by('-timestamp')
+    serializer = UserActivitySerializer(events, many=True)
+    return Response(serializer.data)
 
 # @csrf_exempt
 # @require_GET
 def sse_window_activity(request):
     """SSE endpoint for window activity."""
-    
+
     def event_stream():
-        previous_window = None
+        last_timestamp = UserActivity.objects.latest('timestamp').timestamp if UserActivity.objects.exists() else None
+        """Stream window activity events."""
         while True:
             try:
-                current_window = get_active_window_title()
-                if current_window and current_window != previous_window:
-                    # print(f"Active Window: {current_window}")
-                    yield f"data: {json.dumps({'message': f'Switched to Window: {current_window}'})}\n\n"
-                    previous_window = current_window
-                time.sleep(1)
+                if last_timestamp:
+                    new_events = UserActivity.objects.filter(timestamp__gt=last_timestamp, event_type="window_switch").order_by('timestamp')
+                else:
+                    new_events = UserActivity.objects.filter(event_type="window_switch").order_by('timestamp')
+
+                for event in new_events:
+                    data = {
+                        "timestamp": event.timestamp.strftime('%d-%m-%Y %H:%M:%S'),
+                        "event_type": event.event_type,
+                        "message": event.message,
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    # print(json.dumps(data))
+                    last_timestamp = event.timestamp
+
+                time.sleep(1)  # Poll the database every 1 second
             except Exception as e:
-                print(f"Error monitoring window activity: {str(e)}")
-    
+                print(f"Error streaming window activity: {str(e)}")
+
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
     return response
+
+    
 
 def get_gpu_utilization():
     """Fetches GPU utilization if an NVIDIA GPU is present."""
@@ -426,7 +416,7 @@ def get_process_resources(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
-def kill_process(request):
+def kill_process(request, pid):
     """Kill a process by its PID."""
     pid = request.data.get('pid')
     if not pid:

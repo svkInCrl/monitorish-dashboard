@@ -4,26 +4,23 @@ import time
 import platform
 import socket
 import psutil
-import mysql.connector # type: ignore
+import mysql.connector
 import hashlib
 from datetime import datetime
-import GPUtil # type: ignore
+import GPUtil
 import pwd
 from watchdog.observers import Observer
+
 from watchdog.events import FileSystemEventHandler
 import threading
 from colorama import Fore, Style, init
 import re
 from collections import defaultdict
-from Xlib import X, display # type: ignore
-import Xlib # type: ignore
+from Xlib import X, display
+import Xlib
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from db_config import db_config
-
-conn = mysql.connector.connect(**db_config)
-cursor = conn.cursor()
 
 # Initialize colorama for colored terminal output
 init()
@@ -40,8 +37,8 @@ except json.JSONDecodeError:
     print(f"Error: Invalid JSON in configuration file '{CONFIG_FILE}'. Exiting.")
     exit(1)
 
-# # Database configuration
-# db_config = config.get("database", {})
+# Database configuration
+DB_CONFIG = config.get("database", {})
 
 # # Configure logging
 # logging.basicConfig(filename=config.get("log_file", "activity.log"), level=logging.INFO,
@@ -50,7 +47,7 @@ except json.JSONDecodeError:
 # Configuration variables
 EXCLUDED_PROCESS_NAMES = config.get("excluded_processes", [
     "systemd", "gnome-shell", "Xorg", "Xwayland", "ibus-x11",
-    "mutter-x11-frames", "gsd-xsettings", "dbus-daemon", "NetworkManager"
+    "mutter-x11-frames", "gsd-xsettings", "dbus-daemon", "NetworkManager","sleep", "sh", "cpuUsage.sh"
 ])
 IGNORED_PROCESSES = set(config.get("ignored_processes", [
     "mutter-x11-frames", "ibus-x11", "gsd-xsettings", "Xwayland",
@@ -93,7 +90,7 @@ class ActivityMonitor:
         retry_delay = 5
         for attempt in range(max_retries):
             try:
-                conn = mysql.connector.connect(**db_config)
+                conn = mysql.connector.connect(**DB_CONFIG)
                 if conn.is_connected():
                     logging.info("Database connection successful!")
                     return conn
@@ -189,7 +186,7 @@ class ActivityMonitor:
                     try:
                         app_name = process.info['name']
                         app_pid = process.info['pid']
-                        if self.process_count[app_name] == 0 and app_name not in EXCLUDED_PROCESS_NAMES and not self.should_ignore_process(app_name):  # Exclude specific processes
+                        if self.process_count[app_name] is 0 and app_name not in EXCLUDED_PROCESS_NAMES and not self.should_ignore_process(app_name):  # Exclude specific processes
                             self.process_count[app_name] = 1
                             self.print_app_activity(f"{app_name} started")
                             self._log_user_activity("app_start", f"{app_name} started")
@@ -202,7 +199,7 @@ class ActivityMonitor:
                     try:
                         app_pid = process.info['pid']
                         app_name = process.info['name']
-                        if self.process_count[app_name] == 1 and app_name not in EXCLUDED_PROCESS_NAMES and not self.should_ignore_process(app_name):  # Exclude specific processes
+                        if self.process_count[app_name] is 1 and app_name not in EXCLUDED_PROCESS_NAMES and not self.should_ignore_process(app_name):  # Exclude specific processes
                             self.process_count[app_name] = 0
                             self.print_app_activity(f"{app_name} closed")
                             self._log_user_activity("app_closed", f"{app_name} closed")
@@ -486,3 +483,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+

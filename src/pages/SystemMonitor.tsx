@@ -80,11 +80,7 @@ export default function SystemMonitor() {
             Monitor system resources and performance
           </p>
         </div>
-        <TimePeriodSelector
-          value={timePeriod}
-          onChange={setTimePeriod}
-          className="mr-2"
-        />
+        
       </div>
 
       {/* Error Messages */}
@@ -119,12 +115,20 @@ export default function SystemMonitor() {
 
       {/* Tabs for charts and other system information */}
       <Tabs defaultValue="performance" className="space-y-4">
+      <div className="flex justify-between items-center">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:w-[400px]">
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
           <TabsTrigger value="network">Network</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
+
+        <TimePeriodSelector
+          value={timePeriod}
+          onChange={setTimePeriod}
+          className="mr-2"
+        />
+        </div>
 
         {/* Performance Tab */}
         <TabsContent value="performance" className="space-y-4">

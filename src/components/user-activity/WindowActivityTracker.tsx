@@ -27,8 +27,8 @@ export function WindowActivityTracker() {
       try {
         const data = JSON.parse(event.data);
         
-        if (data.message && data.message.includes("Switched to Window:")) {
-          const windowName = data.message.replace("Switched to Window:", "").trim();
+        if (data.message && data.message.includes("Switched to:")) {
+          const windowName = data.message.replace("Switched to:", "").trim();
           setCurrentWindow(windowName);
           
           // Add to activity history

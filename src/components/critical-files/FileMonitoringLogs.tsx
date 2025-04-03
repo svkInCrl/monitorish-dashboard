@@ -26,8 +26,49 @@ export function FileMonitoringLogs() {
       if (!response.ok) {
         throw new Error("Failed to fetch initial data");
       }
-      const data: FileActivityLog[] = await response.json();
-      setFileActivities(data);
+      const data: { timestamp: string; event_type: string; message: string }[] = await response.json();
+
+      const formattedData: FileActivityLog[] = data.map((entry) => {
+        const { event_type, message, timestamp } = entry;
+  
+        let action: "created" | "modified" | "deleted" | "moved" = "created";
+        let filePath = "";
+        let destination = "";
+        let user = "Unknown";
+  
+        if (message.includes("File created:")) {
+          action = "created";
+          filePath = message.split("File created:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File deleted:")) {
+          action = "deleted";
+          filePath = message.split("File deleted:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File modified:")) {
+          action = "modified";
+          filePath = message.split("File modified:")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        } else if (message.includes("File moved from")) {
+          action = "moved";
+          filePath = message.split("File moved from")[1].split(" to ")[0].trim();
+          destination = message.split(" to ")[1].split(" by ")[0].trim();
+          user = message.split(" by ")[1] || "Unknown";
+        }
+  
+        const fileName = filePath.split("/").pop() || filePath;
+  
+        return {
+          id: crypto.randomUUID(),
+          file_path: filePath,
+          file_name: fileName,
+          timestamp: timestamp,
+          action: action,
+          user: user,
+          destination: action === "moved" ? destination : undefined,
+        };
+      });
+
+      setFileActivities(formattedData.reverse()); // Show the latest changes first
     } catch (error) {
       console.error("Error fetching initial data:", error);
     }
@@ -35,7 +76,7 @@ export function FileMonitoringLogs() {
   
   useEffect(() => {
     fetchInitialData();
-    
+
     const eventSource = new EventSource("http://127.0.0.1:8000/sse_file_activity/");
 
     eventSource.onopen = () => {

@@ -293,8 +293,17 @@ def get_user_activity_events(request):
     """Fetch all UserActivity entries with specific event types."""
     event_types = ['created', 'deleted', 'modified', 'moved']
     events = UserActivity.objects.filter(event_type__in=event_types).order_by('-timestamp')
-    serializer = UserActivitySerializer(events, many=True)
-    return Response(serializer.data)
+
+    formatted_events = [
+        {
+            "timestamp": event.timestamp.strftime('%d-%m-%Y %H:%M:%S'),
+            "event_type": event.event_type,
+            "message": event.message,
+        }
+        for event in events
+    ]
+
+    return Response(formatted_events)
 
 # @csrf_exempt
 # @require_GET

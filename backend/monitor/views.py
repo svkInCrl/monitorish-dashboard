@@ -199,60 +199,39 @@ def sse_stream_hardware(request):
 
 # @csrf_exempt
 # @require_GET
-# def sse_process_activity(request):
-#     """SSE endpoint for process activity."""
-#     # def get_processes():
-#     #     """Returns a set of (pid, name) tuples for running processes."""
-#     #     return {(p.pid, p.info['name']) for p in psutil.process_iter(['pid', 'name'])}
+def sse_process_activity(request):
+    """SSE endpoint for process activity."""
+    # def get_processes():
+    #     """Returns a set of (pid, name) tuples for running processes."""
+    #     return {(p.pid, p.info['name']) for p in psutil.process_iter(['pid', 'name'])}
+    def event_stream():
+        last_timestamp = UserActivity.objects.latest('timestamp').timestamp if UserActivity.objects.exists() else None
+        """Stream window activity events."""
+        while True:
+            try:
+                if last_timestamp:
+                    new_events = UserActivity.objects.filter(timestamp__gt=last_timestamp, event_type__in=['app_started', 'app_closed']).order_by('timestamp')
+                else:
+                    new_events = UserActivity.objects.filter(event_type__in=['app_started', 'app_closed']).order_by('timestamp')
+
+                for event in new_events:
+                    data = {
+                        "timestamp": event.timestamp.strftime('%d-%m-%Y %H:%M:%S'),
+                        "event_type": event.event_type,
+                        "message": event.message,
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    print(json.dumps(data))
+                    last_timestamp = event.timestamp
+
+                time.sleep(1)  # Poll the database every 1 second
+            except Exception as e:
+                print(f"Error streaming window activity: {str(e)}")
     
-#     def event_stream():
-#         previous_processes = set(psutil.process_iter(['pid', 'name']))
-#         process_count = defaultdict(int)
-#         while True:
-#             try:
-#                 # Get current running processes
-#                 current_processes = set(psutil.process_iter(['pid', 'name']))
-
-#                 # Check for newly started applications
-#                 new_processes = current_processes - previous_processes
-#                 for process in new_processes:
-#                     try:
-#                         app_name = process.info['name']
-#                         app_pid = process.info['pid']
-#                         if process_count[app_name] == 0 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
-#                             process_count[app_name] = 1
-#                             print(f"{app_name} started")
-#                             # process_activity.emit(f"{app_name} started")
-#                             yield f"data: {json.dumps({'message': f'{app_name} started'})}\n\n"
-                            
-#                     except (psutil.NoSuchProcess, psutil.AccessDenied):
-#                         pass
-
-#                 # Check for closed applications
-#                 terminated_processes = previous_processes - current_processes
-#                 for process in terminated_processes:
-#                     try:
-#                         app_pid = process.info['pid']
-#                         app_name = process.info['name']
-#                         if process_count[app_name] == 1 and app_name not in excluded_processes and not should_ignore_process(app_name):  # Exclude specific processes
-#                             process_count[app_name] = 0
-#                             print(f"{app_name} closed")
-#                             # process_activity.emit(f"{app_name} closed")
-#                             yield(f"data: {json.dumps({'message': f'{app_name} closed'})}\n\n")
-#                     except (psutil.NoSuchProcess, psutil.AccessDenied):
-#                         pass
-
-#                 # Update previous processes
-#                 previous_processes = current_processes
-#                 time.sleep(1)
-#             except Exception as e:
-#                 print(f"Error monitoring applications: {str(e)}")
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    response['Cache-Control'] = 'no-cache'
+    return response
     
-#     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-#     response['Cache-Control'] = 'no-cache'
-#     # response['Connection'] = 'keep-alive'
-#     # print(response)
-#     return response
 
 # @csrf_exempt
 # @require_GET

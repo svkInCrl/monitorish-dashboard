@@ -141,7 +141,7 @@ export default function UserActivityMonitor() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>
@@ -158,8 +158,8 @@ export default function UserActivityMonitor() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" />
                   <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip
+                  <YAxis yAxisId="right" orientation="right" /> */}
+                  {/* <Tooltip
                     contentStyle={{ 
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -185,8 +185,8 @@ export default function UserActivityMonitor() {
               </ResponsiveContainer>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Activity by Type</CardTitle>
             <CardDescription>
@@ -223,7 +223,7 @@ export default function UserActivityMonitor() {
               </ResponsiveContainer>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

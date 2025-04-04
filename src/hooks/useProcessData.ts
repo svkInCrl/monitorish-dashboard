@@ -70,7 +70,7 @@ export function useProcessCount() {
   return useQuery({
     queryKey: ["processCount"],
     queryFn: fetchProcessCount,
-    refetchInterval: 5000, // Poll every 5 seconds for real-time data
+    refetchInterval: 1000, // Poll every 5 seconds for real-time data
   });
 }
 

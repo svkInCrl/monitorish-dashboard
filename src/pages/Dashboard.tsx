@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Activity, CpuIcon, HardDrive, MonitorIcon, Server, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useProcessInfo } from "@/hooks/useProcessData";
+import { useProcessCount, useProcessInfo } from "@/hooks/useProcessData";
 import { useHistoricalMetrics } from "@/hooks/useMetrics";
 
 import dayjs from "dayjs";
@@ -86,6 +86,8 @@ export default function Dashboard() {
       color: "text-green-500",
     },
   ];
+
+  const {data : processCount, isLoading: isLoadingProcessCount} = useProcessCount();
 
   // Format process data for the chart
   const processChartData = processes ? 

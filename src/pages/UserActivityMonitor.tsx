@@ -2,9 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Clock, FileText, MailOpen, MousePointer, User, Users } from "lucide-react";
 import { WindowActivityTracker } from "@/components/user-activity/WindowActivityTracker";
+import { ProcessActivityTracker } from "@/components/user-activity/ProcessActivityTracker";
 
 // Sample data
 const activityData = [
@@ -141,105 +141,8 @@ export default function UserActivityMonitor() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Activity Timeline</CardTitle>
-            <CardDescription>
-              User sessions and events over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={activityData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" /> */}
-                  {/* <Tooltip
-                    contentStyle={{ 
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      border: 'none'
-                    }}
-                  />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="sessions"
-                    stroke="#3B82F6"
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }}
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="events"
-                    stroke="#8B5CF6"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card> */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Activity by Type</CardTitle>
-            <CardDescription>
-              User activity categorized by type
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={activityTypeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    fill="#8884d8"
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {activityTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ 
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      border: 'none'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card> */}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
         <WindowActivityTracker />
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Application Usage</CardTitle>
-            <CardDescription>
-              Most frequently used applications
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">No data available</p>
-          </CardContent>
-        </Card>
+        <ProcessActivityTracker />
       </div>
 
       <Card>
